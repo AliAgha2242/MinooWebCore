@@ -191,3 +191,21 @@ h1 { font-size: 21px; line-height: 1.4; text-align: center; margin: 0; font-weig
   .groups-footer { font-size: 9px; }
 }
 @media (prefers-reduced-motion: reduce) { .group-accordion *, .choose-group-button { animation: none !important; transition: none !important; } }
+
+
+/* Software items shown inside each group */
+.group-app-count { color: #7fa5bf; font-size: 10px; white-space: nowrap; padding: 5px 8px; border: 1px solid rgba(158,196,222,.12); border-radius: 8px; background: rgba(255,255,255,.025); }
+.software-list { display: grid; gap: 8px; }
+.software-item { display: flex; align-items: center; gap: 11px; min-height: 55px; margin: 0; padding: 8px 10px; border: 1px solid rgba(158,196,222,.11); border-radius: 11px; background: rgba(3,16,29,.35); transition: border-color .2s, background .2s; }
+.software-item:hover { border-color: rgba(91,205,218,.35); background: rgba(21,57,79,.45); }
+.software-icon { display: grid; place-items: center; flex: 0 0 32px; width: 32px; height: 32px; border-radius: 9px; color: #75d9e0; background: rgba(48,135,184,.15); font-size: 19px; }
+.software-name { flex: 1; color: #e4f0f8; font-size: 12px; }
+.choose-software-button { display: inline-flex; align-items: center; gap: 8px; min-height: 32px; padding: 0 12px; border: 1px solid rgba(105,224,223,.25); border-radius: 8px; color: #eafaff; background: rgba(28,130,176,.22); cursor: pointer; font-size: 11px; transition: background .2s, border-color .2s; }
+.choose-software-button:hover { background: rgba(28,153,195,.4); border-color: rgba(105,224,223,.55); }
+.choose-software-button span { font-size: 15px; }
+@media (max-width: 560px) {
+  .group-app-count { font-size: 9px; padding: 4px 6px; }
+  .software-item { gap: 8px; padding: 7px; }
+  .software-name { font-size: 11px; }
+  .choose-software-button { padding: 0 9px; }
+}
