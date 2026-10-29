@@ -1,7 +1,21 @@
 @model LoginViewModel
 @{
     ViewData["Title"] = "ورود به سامانه";
-    var orbitCompanies = new[] { "گروه مینو", "پارس مینو", "قاسم ایران", "مینو زاگرس", "مینو شرق", "شوکوپارس", "پارس دارو", "چاشنی", "مینو کاسپین", "تندیس مینو", "مینو مارت", "خودکفایی آزادگان" };
+    var orbitCompanies = new[]
+    {
+        new { Name = "گروه مینو", Logo = "holding.png" },
+        new { Name = "پارس مینو", Logo = "parsminoo.png" },
+        new { Name = "قاسم ایران", Logo = "ghasem.jpg" },
+        new { Name = "مینو زاگرس", Logo = "zagros.jpg" },
+        new { Name = "مینو شرق", Logo = "tandis.jpeg" },
+        new { Name = "شوکوپارس", Logo = "shocopars.png" },
+        new { Name = "پارس دارو", Logo = "parsdaroo.jpg" },
+        new { Name = "چاشنی", Logo = "chashni.png" },
+        new { Name = "مینو کاسپین", Logo = "kaspian.jpg" },
+        new { Name = "مینو مارت", Logo = "minoomart.jpg" },
+        new { Name = "کدکفایی", Logo = "kodkafaee.png" },
+        new { Name = "مینو", Logo = "holding.png" }
+    };
 }
 <main class="login-page">
     <div class="ambient ambient-one"></div>
@@ -17,20 +31,9 @@
             @for (var i = 0; i < orbitCompanies.Length; i++)
             {
                 <div class="orbit-item" style="--i:@i; --count:@orbitCompanies.Length">
-                    <div class="company-badge" title="@orbitCompanies[i]">
-                        @if (i == 0)
-                        {
-                            <img src="~/images/logos/minoo.png" alt="@orbitCompanies[i]" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" />
-                        }
-                        else if (i == 5)
-                        {
-                            <img src="~/images/logos/choco-pars.png" alt="@orbitCompanies[i]" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" />
-                        }
-                        else if (i == 2)
-                        {
-                            <img src="~/images/logos/ghasem-iran.jpg" alt="@orbitCompanies[i]" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" />
-                        }
-                        <span>@orbitCompanies[i]</span>
+                    <div class="company-badge" title="@orbitCompanies[i].Name">
+                        <img src="@Url.Content("~/images/logos/" + orbitCompanies[i].Logo)" alt="@orbitCompanies[i].Name" loading="eager" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" />
+                        <span>@orbitCompanies[i].Name</span>
                     </div>
                 </div>
             }
