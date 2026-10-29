@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
-builder.Services.AddScoped<IAuthenticateService, DemoAuthenticationService>();
+builder.Services.AddScoped<IAuthenticateService, AuthenticateService>();
 
 builder.Services
     .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
