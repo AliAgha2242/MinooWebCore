@@ -1,0 +1,70 @@
+@{
+    ViewData["Title"] = "پنل مدیریت";
+    var menuItems = ViewBag.MenuItems as (string Key, string Title, string Description, string Icon)[] ?? [];
+    var selectedSection = ViewBag.SelectedSection as string ?? "dashboard";
+    var selectedTitle = ViewBag.SelectedTitle as string ?? "نمای کلی";
+    var selectedDescription = ViewBag.SelectedDescription as string ?? "";
+}
+<main class="admin-page">
+    <aside class="admin-sidebar">
+        <a class="admin-brand" asp-controller="Home" asp-action="Index">
+            <span class="brand-mark">M<span>•</span></span>
+            <span class="brand-copy"><strong>MINOO</strong><span>WEB CORE</span></span>
+        </a>
+        <div class="admin-sidebar-label">مدیریت سامانه</div>
+        <nav class="admin-menu" aria-label="منوی مدیریت">
+            @foreach (var item in menuItems)
+            {
+                <a class="admin-menu-link @(selectedSection == item.Key ? "active" : "")"
+                   asp-controller="Admin" asp-action="Index" asp-route-section="@item.Key">
+                    <span class="admin-menu-icon">@item.Icon</span>
+                    <span>@item.Title</span>
+                    @if (selectedSection == item.Key) { <span class="admin-menu-active-dot"></span> }
+                </a>
+            }
+        </nav>
+        <a class="admin-back-link" asp-controller="Home" asp-action="Index"><span>←</span> بازگشت به انتخاب نرم‌افزار</a>
+    </aside>
+
+    <section class="admin-main">
+        <header class="admin-topbar">
+            <div>
+                <span class="admin-breadcrumb">MINOO / ADMINISTRATION</span>
+                <h1>پنل مدیریت</h1>
+            </div>
+            <div class="admin-profile">
+                <span class="admin-profile-avatar">@(User.Identity?.Name?.Length > 0 ? User.Identity.Name[..1].ToUpperInvariant() : "م")</span>
+                <span>@User.Identity?.Name</span>
+            </div>
+        </header>
+
+        <div class="admin-welcome">
+            <div>
+                <span class="admin-eyebrow"><span class="status-dot"></span> فضای مدیریت</span>
+                <h2>@selectedTitle</h2>
+                <p>@selectedDescription</p>
+            </div>
+            <span class="admin-welcome-symbol">M<span>•</span></span>
+        </div>
+
+        @if (selectedSection == "dashboard")
+        {
+            <div class="admin-stat-grid">
+                <article class="admin-stat-card"><span class="admin-stat-icon">♙</span><span class="admin-stat-label">کاربران</span><strong>—</strong><small>هنوز به پایگاه داده متصل نشده</small></article>
+                <article class="admin-stat-card"><span class="admin-stat-icon">▤</span><span class="admin-stat-label">نرم‌افزارها</span><strong>—</strong><small>آمار پس از پیاده‌سازی مدیریت نمایش داده می‌شود</small></article>
+                <article class="admin-stat-card"><span class="admin-stat-icon">⚿</span><span class="admin-stat-label">نقش‌ها و دسترسی‌ها</span><strong>—</strong><small>در انتظار تعریف ساختار دسترسی</small></article>
+            </div>
+        }
+        else
+        {
+            <section class="admin-placeholder">
+                <span class="admin-placeholder-icon">◈</span>
+                <h3>این بخش آماده توسعه است</h3>
+                <p>صفحه «@selectedTitle» فعلاً به‌صورت جایگاه اولیه ایجاد شده است. منطق و عملیات این قسمت در مرحله بعد اضافه خواهد شد.</p>
+            </section>
+        }
+
+        <div class="admin-notice"><span>i</span><p>این پنل فعلاً ساختار ظاهری و منوهای اولیه را دارد؛ عملیات مدیریتی هنوز پیاده‌سازی نشده است.</p></div>
+        <footer class="admin-footer"><span>© @DateTime.Now.Year گروه صنعتی مینو</span><span>MINOO WEB CORE · ADMIN</span></footer>
+    </section>
+</main>
