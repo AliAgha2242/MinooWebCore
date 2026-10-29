@@ -1,15 +1,70 @@
 @{
-    ViewData["Title"] = "صفحه اصلی";
+    ViewData["Title"] = "انتخاب گروه نرم افزاری";
+    var softwareGroups = ViewBag.SoftwareGroups as string[] ?? Array.Empty<string>();
+    var selectedGroup = TempData["SelectedGroup"] as string;
 }
-<main class="simple-page">
-    <section class="simple-card">
-        <div class="brand-mark">M<span>•</span></div>
-        <p class="eyebrow">MINOO WEB CORE</p>
-        <h1>ورود موفقیت‌آمیز بود</h1>
-        <p class="subtitle">سلام، @User.Identity?.Name. صفحه اصلی اولیه سامانه آماده توسعه است.</p>
-        <form asp-controller="Account" asp-action="Logout" method="post">
-            @Html.AntiForgeryToken()
-            <button type="submit" class="submit-button">خروج از حساب</button>
-        </form>
+<main class="groups-page">
+    <div class="groups-glow groups-glow-one"></div>
+    <div class="groups-glow groups-glow-two"></div>
+
+    <header class="groups-header">
+        <a class="groups-brand" asp-controller="Home" asp-action="Index" aria-label="صفحه اصلی مینو">
+            <span class="brand-mark">M<span>•</span></span>
+            <span class="brand-copy"><strong>MINOO</strong><span>WEB CORE</span></span>
+        </a>
+        <div class="groups-user">
+            <span class="user-avatar">@(User.Identity?.Name?.Length > 0 ? User.Identity.Name[..1].ToUpperInvariant() : "م")</span>
+            <span>@User.Identity?.Name</span>
+            <form asp-controller="Account" asp-action="Logout" method="post">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="logout-button">خروج</button>
+            </form>
+        </div>
+    </header>
+
+    <section class="groups-content">
+        <div class="groups-intro">
+            <span class="groups-eyebrow"><span class="status-dot"></span> درگاه یکپارچه سازمانی</span>
+            <h1>به کدام بخش می‌روید؟</h1>
+            <p>گروه نرم‌افزاری موردنظر خود را انتخاب کنید تا به بخش مربوطه وارد شوید.</p>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(selectedGroup))
+        {
+            <div class="group-selection-message" role="status">
+                <span class="selection-check">✓</span>
+                <span><strong>@selectedGroup</strong><small>انتخاب شد. اتصال نرم‌افزارهای این گروه در مرحله بعد اضافه می‌شود.</small></span>
+            </div>
+        }
+
+        <div class="groups-list" aria-label="گروه‌های نرم‌افزاری">
+            @for (var i = 0; i < softwareGroups.Length; i++)
+            {
+                <details class="group-accordion">
+                    <summary>
+                        <span class="group-number">@((i + 1).ToString("00"))</span>
+                        <span class="group-title">@softwareGroups[i]</span>
+                        <span class="group-chevron" aria-hidden="true">⌄</span>
+                    </summary>
+                    <div class="group-details">
+                        <p>برای ادامه، این گروه نرم‌افزاری را انتخاب کنید.</p>
+                        <form asp-controller="Home" asp-action="SelectGroup" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="groupName" value="@softwareGroups[i]" />
+                            <button type="submit" class="choose-group-button">
+                                انتخاب این گروه <span aria-hidden="true">←</span>
+                            </button>
+                        </form>
+                    </div>
+                </details>
+            }
+        </div>
+
+        <p class="groups-footnote"><span>✦</span> فهرست گروه‌ها قابل توسعه است و می‌تواند به‌صورت داینامیک از سامانه دریافت شود.</p>
     </section>
+
+    <footer class="groups-footer">
+        <span>© @DateTime.Now.Year گروه صنعتی مینو</span>
+        <span>MINOO WEB CORE</span>
+    </footer>
 </main>
