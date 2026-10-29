@@ -1,0 +1,15 @@
+@{
+    ViewData["Title"] = "صفحه اصلی";
+}
+<main class="simple-page">
+    <section class="simple-card">
+        <div class="brand-mark">M<span>•</span></div>
+        <p class="eyebrow">MINOO WEB CORE</p>
+        <h1>ورود موفقیت‌آمیز بود</h1>
+        <p class="subtitle">سلام، @User.Identity?.Name. صفحه اصلی اولیه سامانه آماده توسعه است.</p>
+        <form asp-controller="Account" asp-action="Logout" method="post">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="submit-button">خروج از حساب</button>
+        </form>
+    </section>
+</main>
