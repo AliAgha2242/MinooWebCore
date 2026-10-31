@@ -1,24 +1,34 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MinooWebCore.Models;
+using MinooWebCore.Services.Redis;
 
 namespace MinooWebCore.Controllers;
 
 [Authorize]
 public sealed class HomeController : Controller
 {
-    // Temporary sample data. Software entries can later come from a database or API.
     private static readonly Dictionary<string, string[]> SoftwareGroups = new()
     {
-        ["گروه نرم افزاری اطلاعات پایه"] = new[] { "برنامه یک", "برنامه دو", "برنامه سه" },
-        ["گروه نرم افزاری انبار و برنامه ریزی"] = new[] { "برنامه یک", "برنامه دو", "برنامه سه" },
-        ["گروه نرم افزاری گزارشات مبتنی بر وب"] = new[] { "برنامه یک", "برنامه دو", "برنامه سه" },
-        ["گروه نرم افزاری مالی"] = new[] { "اجرا نگاشت", "برنامه دو", "برنامه سه" },
-        ["گروه نرم افزاری توسعه دهنگان"] = new[] { "برنامه یک", "برنامه دو", "برنامه سه" }
+        ["گروه نرم افزاری گزارشات مبتنی بر وب"] = ["برنامه یک", "برنامه دو", "برنامه سه"],
+        ["گروه نرم افزاری مالی"] = ["اجرا نگاشت", "برنامه دو", "برنامه سه"]
     };
 
-    public IActionResult Index()
+    private readonly IRedisService _redis;
+
+    public HomeController(IRedisService redis) => _redis = redis;
+
+    public async Task<IActionResult> Index()
     {
         ViewBag.SoftwareGroups = SoftwareGroups;
+        if (!TryGetUserId(out var userId))
+            return Forbid();
+
+        ViewBag.FavoriteApplications =
+            await _redis.GetAsync<List<FavoriteApplication>>(GetFavoriteApplicationsKey(userId))
+            ?? [];
+
         return View();
     }
 
@@ -30,9 +40,7 @@ public sealed class HomeController : Controller
             !SoftwareGroups.TryGetValue(groupName, out var softwareList) ||
             string.IsNullOrWhiteSpace(softwareName) ||
             !softwareList.Contains(softwareName, StringComparer.Ordinal))
-        {
             return BadRequest();
-        }
 
         TempData["SelectedGroup"] = groupName;
         TempData["SelectedSoftware"] = softwareName;
@@ -41,4 +49,10 @@ public sealed class HomeController : Controller
 
     [AllowAnonymous]
     public IActionResult Error() => View();
+
+    private bool TryGetUserId(out int userId) =>
+        int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out userId);
+
+    private static string GetFavoriteApplicationsKey(int userId) =>
+        $"minoo:user:{userId}:favorite-applications";
 }
