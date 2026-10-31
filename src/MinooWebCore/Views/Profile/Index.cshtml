@@ -1,2 +1,49 @@
-@{ ViewData["Title"] = "پنل کاربری"; }
-<main class="profile-page"><h1>پنل کاربری</h1></main>
+@{
+    ViewData["Title"] = "پنل کاربری";
+    var userName = ViewBag.UserName as string ?? User.Identity?.Name ?? "کاربر";
+    var newPassword = TempData["NewPassword"] as string;
+}
+<main class="profile-page">
+    <header class="profile-header">
+        <a class="profile-brand" asp-controller="Home" asp-action="Index"><span class="brand-mark">M<span>•</span></span><span class="brand-copy"><strong>MINOO</strong><span>WEB CORE</span></span></a>
+        <a class="profile-back" asp-controller="Home" asp-action="Index">بازگشت به صفحه اصلی ←</a>
+    </header>
+    <section class="profile-content">
+        <div class="profile-heading"><span class="profile-eyebrow">PERSONAL SETTINGS</span><h1>پنل کاربری</h1><p>تنظیمات ظاهری حساب کاربری خود را مدیریت کنید.</p></div>
+        <section class="profile-card account-card"><div class="profile-avatar-preview" data-user-avatar>@userName[..1].ToUpperInvariant()</div><div><span class="profile-card-label">حساب کاربری</span><h2>@userName</h2><p>تنظیمات شخصی این حساب</p></div></section>
+        <section class="profile-card">
+            <div class="profile-section-heading"><span class="profile-section-icon">◐</span><div><h2>تم سایت</h2><p>ظاهر سامانه را مطابق سلیقه خود انتخاب کنید.</p></div></div>
+            <div class="theme-options">
+                <button type="button" class="theme-option" data-theme-value="dark"><span class="theme-swatch theme-dark"></span><strong>تیره</strong><small>Dark</small></button>
+                <button type="button" class="theme-option" data-theme-value="light"><span class="theme-swatch theme-light"></span><strong>روشن</strong><small>Light</small></button>
+                <button type="button" class="theme-option" data-theme-value="blue"><span class="theme-swatch theme-blue"></span><strong>آبی</strong><small>Ocean</small></button>
+            </div>
+        </section>
+        <section class="profile-card">
+            <div class="profile-section-heading"><span class="profile-section-icon">☺</span><div><h2>آیکون پروفایل</h2><p>آیکونی را برای نمایش کنار نام خود انتخاب کنید.</p></div></div>
+            <div class="avatar-options">
+                @foreach (var icon in new[] { "م", "☺", "★", "◆", "✦", "⚙", "♟", "●" }) { <button type="button" class="avatar-option" data-icon-value="@icon">@icon</button> }
+            </div>
+        </section>
+        <section class="profile-card password-card">
+            <div class="profile-section-heading"><span class="profile-section-icon">⌑</span><div><h2>بازنشانی رمز عبور</h2><p>با این عملیات، رمز جدیدی برای حساب شما تولید و جایگزین رمز فعلی می‌شود.</p></div></div>
+            @if (TempData["Success"] is string success) { <div class="profile-success" role="status">@success</div> }
+            @if (!string.IsNullOrWhiteSpace(newPassword)) {
+                <div class="new-password-result"><span>رمز جدید حساب شما</span><strong dir="ltr">@newPassword</strong><button type="button" class="copy-password" data-copy-password="@newPassword">کپی رمز</button><small>این رمز را در جای امنی نگهداری کنید؛ پس از ترک این صفحه دوباره نمایش داده نمی‌شود.</small></div>
+            }
+            <form asp-controller="Profile" asp-action="ResetPassword" method="post" onsubmit="return confirm('رمز فعلی بازنشانی و با یک رمز جدید جایگزین شود؟');">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="reset-password-button">بازنشانی رمز عبور ↻</button>
+            </form>
+        </section>
+    </section>
+    <footer class="profile-footer"><span>© @DateTime.Now.Year گروه صنعتی مینو</span><span>MINOO WEB CORE</span></footer>
+</main>
+@section Scripts {
+<script>
+document.querySelectorAll("[data-copy-password]").forEach(button => button.addEventListener("click", async () => {
+    await navigator.clipboard.writeText(button.dataset.copyPassword);
+    button.textContent = "کپی شد";
+}));
+</script>
+}
