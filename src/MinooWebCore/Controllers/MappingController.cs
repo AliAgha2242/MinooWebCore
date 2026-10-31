@@ -6,7 +6,7 @@ using MinooWebCore.Data.Models;
 using MinooWebCore.Persistence.StaticConfiguration;
 using MinooWebCore.Services.Wcf;
 using MinooWebCore.Services.Wcf.Contracts;
-using StackExchange.Redis;
+using MinooWebCore.Services.Redis;
 
 namespace MinooWebCore.Controllers;
 
@@ -20,20 +20,20 @@ public sealed class MappingController : ControllerBase
 
     private readonly IMinooConfiguration _minooConfiguration;
     private readonly IWcfClient _wcfClient;
-    private readonly IDatabase _redis;
+    private readonly IRedisService _redis;
     private readonly IConfiguration _configuration;
     private readonly ILogger<MappingController> _logger;
 
     public MappingController(
         IMinooConfiguration minooConfiguration,
         IWcfClient wcfClient,
-        IConnectionMultiplexer redis,
+        IRedisService redis,
         IConfiguration configuration,
         ILogger<MappingController> logger)
     {
         _minooConfiguration = minooConfiguration;
         _wcfClient = wcfClient;
-        _redis = redis.GetDatabase();
+        _redis = redis;
         _configuration = configuration;
         _logger = logger;
     }
@@ -45,7 +45,7 @@ public sealed class MappingController : ControllerBase
 
         var statuses = await Task.WhenAll(servers.Select(async server =>
         {
-            var ttl = await _redis.KeyTimeToLiveAsync(GetRateLimitKey(server));
+            var ttl = await _redis.GetTimeToLiveAsync(GetRateLimitKey(server));
             return new MappingServerStatus(
                 server.VahedeTejariSN,
                 server.ServerName,
@@ -103,15 +103,11 @@ public sealed class MappingController : ControllerBase
                 "Failed", "نام سرور در AppConfig.json خالی است.");
 
         var key = GetRateLimitKey(server);
-        var acquired = await _redis.StringSetAsync(
-            key,
-            Guid.NewGuid().ToString("N"),
-            MappingInterval,
-            When.NotExists);
+        var acquired = await _redis.SetIfNotExistsAsync(key, Guid.NewGuid().ToString("N"), MappingInterval);
 
         if (!acquired)
         {
-            var ttl = await _redis.KeyTimeToLiveAsync(key);
+            var ttl = await _redis.GetTimeToLiveAsync(key);
             var remaining = ttl is null ? 0 : Math.Max(0, (long)Math.Ceiling(ttl.Value.TotalSeconds));
             return new MappingExecutionResult(server.VahedeTejariSN, server.ServerName,
                 "Limited", $"برای این سرور قبلاً درخواست ثبت شده است. زمان باقی‌مانده: {remaining} ثانیه.",
@@ -167,7 +163,7 @@ public sealed class MappingController : ControllerBase
         }
     }
 
-    private static RedisKey GetRateLimitKey(ServerInfo server) =>
+    private static string GetRateLimitKey(ServerInfo server) =>
         $"minoo:mapping:cooldown:{server.VahedeTejariSN.ToString(CultureInfo.InvariantCulture)}";
 }
 
