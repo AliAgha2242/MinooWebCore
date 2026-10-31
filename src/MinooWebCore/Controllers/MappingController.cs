@@ -21,17 +21,20 @@ public sealed class MappingController : ControllerBase
     private readonly IWcfClient _wcfClient;
     private readonly IDatabase _redis;
     private readonly IConfiguration _configuration;
+    private readonly ILogger<MappingController> _logger;
 
     public MappingController(
         IMinooConfiguration minooConfiguration,
         IWcfClient wcfClient,
         IConnectionMultiplexer redis,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        ILogger<MappingController> logger)
     {
         _minooConfiguration = minooConfiguration;
         _wcfClient = wcfClient;
         _redis = redis.GetDatabase();
         _configuration = configuration;
+        _logger = logger;
     }
 
     [HttpGet("servers")]
@@ -152,8 +155,13 @@ public sealed class MappingController : ControllerBase
                 success ? "Success" : "Failed",
                 responseMessage);
         }
-        catch (Exception)
+        catch (Exception exception)
         {
+            _logger.LogError(exception,
+                "WCF mapping execution failed for server {ServerName} (SN: {ServerId}).",
+                server.ServerName,
+                server.VahedeTejariSN);
+
             // The one-hour cooldown is retained for failed attempts as well.
             return new MappingExecutionResult(server.VahedeTejariSN, server.ServerName,
                 "Failed", "ارتباط با سرویس WCF ناموفق بود. محدودیت یک‌ساعته برای این تلاش حفظ شد.");
