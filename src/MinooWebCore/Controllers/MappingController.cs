@@ -129,7 +129,8 @@ public sealed class MappingController : ControllerBase
                 ConsumerPassword = serviceUserPassword
             };
 
-            serviceRequest.SetArguments(serviceUserId, serviceUserPassword, callSynchronous);
+            // The middleware's dispatcher expects the command name as the first serialized argument.
+            serviceRequest.SetArguments("NegashtCaller", serviceUserId, serviceUserPassword, callSynchronous);
 
             var response = await _wcfClient.InvokeAsync<IBaseService, ServiceResponse>(
                 endpoint,
