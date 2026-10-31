@@ -1,3 +1,7 @@
+using MinooWebCore.Application.Services;
+using MinooWebCore.Data;
+using MinooWebCore.Infrastructure;
+using MinooWebCore.Infrastructure.Services.Contract;
 using MinooWebCore.Services;
 using MinooWebCore.Services.Wcf;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -5,7 +9,10 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
-builder.Services.AddScoped<IAuthenticateService, DemoAuthenticationService>();
+builder.Services.infrasreg(builder.Configuration);
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddScoped<IUsersService, UsersService>();
+builder.Services.AddScoped<IAuthenticateService, AuthenticateService>();
 builder.Services.AddWcfClient();
 
 builder.Services

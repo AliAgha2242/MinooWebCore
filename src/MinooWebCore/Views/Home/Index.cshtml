@@ -1,15 +1,82 @@
 @{
-    ViewData["Title"] = "صفحه اصلی";
+    ViewData["Title"] = "انتخاب نرم‌افزار";
+    var softwareGroups = ViewBag.SoftwareGroups as Dictionary<string, string[]> ?? new Dictionary<string, string[]>();
+    var selectedGroup = TempData["SelectedGroup"] as string;
+    var selectedSoftware = TempData["SelectedSoftware"] as string;
 }
-<main class="simple-page">
-    <section class="simple-card">
-        <div class="brand-mark">M<span>•</span></div>
-        <p class="eyebrow">MINOO WEB CORE</p>
-        <h1>ورود موفقیت‌آمیز بود</h1>
-        <p class="subtitle">سلام، @User.Identity?.Name. صفحه اصلی اولیه سامانه آماده توسعه است.</p>
-        <form asp-controller="Account" asp-action="Logout" method="post">
-            @Html.AntiForgeryToken()
-            <button type="submit" class="submit-button">خروج از حساب</button>
-        </form>
+<main class="groups-page">
+    <div class="groups-glow groups-glow-one"></div>
+    <div class="groups-glow groups-glow-two"></div>
+
+    <header class="groups-header">
+        <a class="groups-brand" asp-controller="Home" asp-action="Index" aria-label="صفحه اصلی مینو">
+            <span class="brand-mark">M<span>•</span></span>
+            <span class="brand-copy"><strong>MINOO</strong><span>WEB CORE</span></span>
+        </a>
+        <div class="groups-user">
+            <a class="admin-shortcut" asp-controller="Admin" asp-action="Index">پنل مدیریت <span aria-hidden="true">↗</span></a>
+            <a class="admin-shortcut" asp-controller="Profile" asp-action="Index">پنل کاربری <span aria-hidden="true">↗</span></a>
+            <span class="user-avatar" data-user-avatar>@(User.Identity?.Name?.Length > 0 ? User.Identity.Name[..1].ToUpperInvariant() : "م")</span>
+            <span>@User.Identity?.Name</span>
+            <form asp-controller="Account" asp-action="Logout" method="post">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="logout-button">خروج</button>
+            </form>
+        </div>
+    </header>
+
+    <section class="groups-content">
+        <div class="groups-intro">
+            <span class="groups-eyebrow"><span class="status-dot"></span> درگاه یکپارچه سازمانی</span>
+            <h1>نرم‌افزار موردنظر را انتخاب کنید</h1>
+            <p>گروه را باز کنید و از فهرست زیرمجموعه، نرم‌افزار دلخواهتان را انتخاب کنید.</p>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(selectedSoftware))
+        {
+            <div class="group-selection-message" role="status">
+                <span class="selection-check">✓</span>
+                <span>
+                    <strong>@selectedSoftware</strong>
+                    <small>از مجموعه «@selectedGroup» انتخاب شد.</small>
+                </span>
+            </div>
+        }
+
+        <div class="groups-list" aria-label="گروه‌ها و نرم‌افزارها">
+            @foreach (var group in softwareGroups)
+            {
+                <details class="group-accordion">
+                    <summary>
+                        <span class="group-number">@((Array.IndexOf(softwareGroups.Keys.ToArray(), group.Key) + 1).ToString("00"))</span>
+                        <span class="group-title">@group.Key</span>
+                        <span class="group-app-count">@group.Value.Length نرم‌افزار</span>
+                        <span class="group-chevron" aria-hidden="true">⌄</span>
+                    </summary>
+                    <div class="group-details">
+                        <div class="software-list">
+                            @foreach (var software in group.Value)
+                            {
+                                <form asp-controller="Home" asp-action="SelectSoftware" method="post" class="software-item">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="groupName" value="@group.Key" />
+                                    <input type="hidden" name="softwareName" value="@software" />
+                                    <span class="software-icon" aria-hidden="true">▦</span>
+                                    <span class="software-name">@software</span>
+                                    <button type="submit" class="choose-software-button">ورود <span aria-hidden="true">←</span></button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                </details>
+            }
+        </div>
+
+        <p class="groups-footnote"><span>✦</span> نام برنامه‌ها فعلاً نمونه است و بعداً می‌توان آن‌ها را با نرم‌افزارهای واقعی جایگزین کرد.</p>
     </section>
+
+    <footer class="groups-footer">
+        <span>© @DateTime.Now.Year گروه صنعتی مینو</span>
+        <span>MINOO WEB CORE</span>
+    </footer>
 </main>

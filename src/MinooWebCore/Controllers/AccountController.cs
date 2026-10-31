@@ -34,7 +34,10 @@ public sealed class AccountController : Controller
         if (!ModelState.IsValid)
             return View(model);
 
-        if (!await _authenticationService.ValidateCredentialsAsync(model.Username, model.Password, cancellationToken))
+        var authenticatedUser = await _authenticationService.ValidateCredentialsAsync(
+            model.Username, model.Password, cancellationToken);
+
+        if (authenticatedUser is null)
         {
             ModelState.AddModelError(string.Empty, "نام کاربری یا رمز عبور صحیح نیست.");
             return View(model);
@@ -42,8 +45,8 @@ public sealed class AccountController : Controller
 
         var claims = new List<Claim>
         {
-            new(ClaimTypes.NameIdentifier, model.Username),
-            new(ClaimTypes.Name, model.Username),
+            new(ClaimTypes.NameIdentifier, authenticatedUser.UserId.ToString()),
+            new(ClaimTypes.Name, authenticatedUser.UserName),
             new(ClaimTypes.Role, "User")
         };
 
@@ -83,7 +86,6 @@ public sealed class AccountController : Controller
     [ValidateAntiForgeryToken]
     public IActionResult ForgotPassword(string? usernameOrEmail)
     {
-        // Add your password recovery logic here.
         TempData["Info"] = "این بخش آماده اتصال به فرایند بازیابی رمز عبور شماست.";
         return RedirectToAction(nameof(ForgotPassword));
     }
