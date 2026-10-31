@@ -57,14 +57,27 @@
                         <div class="software-list">
                             @foreach (var software in group.Value)
                             {
-                                <form asp-controller="Home" asp-action="SelectSoftware" method="post" class="software-item">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="groupName" value="@group.Key" />
-                                    <input type="hidden" name="softwareName" value="@software" />
-                                    <span class="software-icon" aria-hidden="true">▦</span>
-                                    <span class="software-name">@software</span>
-                                    <button type="submit" class="choose-software-button">ورود <span aria-hidden="true">←</span></button>
-                                </form>
+                                if (software == "اجرا نگاشت")
+                                {
+                                    <div class="software-item">
+                                        <span class="software-icon" aria-hidden="true">▦</span>
+                                        <span class="software-name">@software</span>
+                                        <button type="button" class="choose-software-button" data-open-mapping>
+                                            انتخاب سرورها <span aria-hidden="true">←</span>
+                                        </button>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <form asp-controller="Home" asp-action="SelectSoftware" method="post" class="software-item">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="groupName" value="@group.Key" />
+                                        <input type="hidden" name="softwareName" value="@software" />
+                                        <span class="software-icon" aria-hidden="true">▦</span>
+                                        <span class="software-name">@software</span>
+                                        <button type="submit" class="choose-software-button">ورود <span aria-hidden="true">←</span></button>
+                                    </form>
+                                }
                             }
                         </div>
                     </div>
@@ -80,3 +93,46 @@
         <span>MINOO WEB CORE</span>
     </footer>
 </main>
+
+<div class="mapping-modal" data-mapping-modal hidden aria-hidden="true">
+    <div class="mapping-backdrop" data-close-mapping></div>
+    <section class="mapping-dialog" role="dialog" aria-modal="true" aria-labelledby="mapping-title">
+        <header class="mapping-dialog-header">
+            <div>
+                <span class="mapping-kicker">SANAD MALI / WCF</span>
+                <h2 id="mapping-title">اجرای نگاشت</h2>
+                <p>سرورهای موردنظر را انتخاب و عملیات را اجرا کنید.</p>
+            </div>
+            <button type="button" class="mapping-close" aria-label="بستن" data-close-mapping>×</button>
+        </header>
+
+        <div class="mapping-modal-layout">
+            <aside class="mapping-servers-panel">
+                <div class="mapping-panel-heading">
+                    <strong>فهرست سرورها</strong>
+                    <span data-server-count>در حال دریافت...</span>
+                </div>
+                <div class="mapping-server-list" data-server-list>
+                    <p class="mapping-empty">در حال دریافت فهرست سرورها...</p>
+                </div>
+            </aside>
+
+            <div class="mapping-main-panel">
+                <div class="mapping-info">
+                    <span class="mapping-info-icon">i</span>
+                    <span>برای هر سرور، اجرای نگاشت حداکثر یک‌بار در هر ساعت مجاز است.</span>
+                </div>
+                <div class="mapping-selection-summary" data-selection-summary>هنوز سروری انتخاب نشده است.</div>
+                <div class="mapping-results" data-mapping-results aria-live="polite"></div>
+                <div class="mapping-actions">
+                    <button type="button" class="mapping-secondary-button" data-close-mapping>انصراف</button>
+                    <button type="button" class="mapping-submit-button" data-run-mapping disabled>
+                        <span>اجرای نگاشت سرورهای انتخاب‌شده</span>
+                        <span aria-hidden="true">←</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div hidden>@Html.AntiForgeryToken()</div>
+    </section>
+</div>
