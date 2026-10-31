@@ -1,7 +1,9 @@
+using System.Diagnostics;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
 using System.Text;
 using System.Xml;
+using Microsoft.Extensions.Logging;
 
 namespace MinooWebCore.Services.Wcf;
 
@@ -9,7 +11,7 @@ namespace MinooWebCore.Services.Wcf;
 /// Creates a WCF channel for each call, invokes the requested operation,
 /// and closes or aborts the channel safely.
 /// </summary>
-public sealed class WcfClient : IWcfClient
+public sealed class WcfClient(ILogger<WcfClient>? logger = null) : IWcfClient
 {
     public TResult Invoke<TContract, TResult>(
         string endpointUrl,
@@ -19,19 +21,51 @@ public sealed class WcfClient : IWcfClient
     {
         ArgumentNullException.ThrowIfNull(operation);
 
-        var factory = CreateFactory<TContract>(endpointUrl, binding);
+        ChannelFactory<TContract>? factory = null;
         TContract? proxy = null;
+        var stage = "CreateFactory";
+        var stopwatch = Stopwatch.StartNew();
+
+        logger?.LogInformation(
+            "Starting synchronous WCF call. Contract: {Contract}; Endpoint: {Endpoint}",
+            typeof(TContract).FullName,
+            endpointUrl);
 
         try
         {
+            factory = CreateFactory<TContract>(endpointUrl, binding);
+
+            stage = "CreateChannel";
             proxy = factory.CreateChannel();
+            logger?.LogDebug("WCF channel created for {Contract}.", typeof(TContract).FullName);
+
+            stage = "InvokeOperation";
+            logger?.LogInformation("Invoking synchronous WCF operation for {Contract}.", typeof(TContract).FullName);
             var result = operation(proxy);
+            logger?.LogInformation(
+                "WCF operation completed for {Contract} in {ElapsedMilliseconds} ms.",
+                typeof(TContract).FullName,
+                stopwatch.ElapsedMilliseconds);
+
+            stage = "CloseChannel";
             CloseCommunicationObject(proxy);
+
+            stage = "CloseFactory";
             CloseCommunicationObject(factory);
+
+            logger?.LogDebug("WCF call completed successfully for {Contract}.", typeof(TContract).FullName);
             return result;
         }
-        catch
+        catch (Exception exception)
         {
+            logger?.LogError(
+                exception,
+                "WCF call failed at stage {Stage}. Contract: {Contract}; Endpoint: {Endpoint}; Elapsed: {ElapsedMilliseconds} ms.",
+                stage,
+                typeof(TContract).FullName,
+                endpointUrl,
+                stopwatch.ElapsedMilliseconds);
+
             AbortCommunicationObject(proxy);
             AbortCommunicationObject(factory);
             throw;
@@ -46,19 +80,51 @@ public sealed class WcfClient : IWcfClient
     {
         ArgumentNullException.ThrowIfNull(operation);
 
-        var factory = CreateFactory<TContract>(endpointUrl, binding);
+        ChannelFactory<TContract>? factory = null;
         TContract? proxy = null;
+        var stage = "CreateFactory";
+        var stopwatch = Stopwatch.StartNew();
+
+        logger?.LogInformation(
+            "Starting asynchronous WCF call. Contract: {Contract}; Endpoint: {Endpoint}",
+            typeof(TContract).FullName,
+            endpointUrl);
 
         try
         {
+            factory = CreateFactory<TContract>(endpointUrl, binding);
+
+            stage = "CreateChannel";
             proxy = factory.CreateChannel();
+            logger?.LogDebug("WCF channel created for {Contract}.", typeof(TContract).FullName);
+
+            stage = "InvokeOperation";
+            logger?.LogInformation("Invoking asynchronous WCF operation for {Contract}.", typeof(TContract).FullName);
             var result = await operation(proxy).ConfigureAwait(false);
+            logger?.LogInformation(
+                "WCF operation completed for {Contract} in {ElapsedMilliseconds} ms.",
+                typeof(TContract).FullName,
+                stopwatch.ElapsedMilliseconds);
+
+            stage = "CloseChannel";
             CloseCommunicationObject(proxy);
+
+            stage = "CloseFactory";
             CloseCommunicationObject(factory);
+
+            logger?.LogDebug("WCF call completed successfully for {Contract}.", typeof(TContract).FullName);
             return result;
         }
-        catch
+        catch (Exception exception)
         {
+            logger?.LogError(
+                exception,
+                "WCF call failed at stage {Stage}. Contract: {Contract}; Endpoint: {Endpoint}; Elapsed: {ElapsedMilliseconds} ms.",
+                stage,
+                typeof(TContract).FullName,
+                endpointUrl,
+                stopwatch.ElapsedMilliseconds);
+
             AbortCommunicationObject(proxy);
             AbortCommunicationObject(factory);
             throw;
