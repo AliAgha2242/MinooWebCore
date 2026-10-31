@@ -59,17 +59,17 @@
                             {
                                 if (software == "اجرا نگاشت")
                                 {
-                                    <div class="software-item">
+                                    <div class="software-item software-item-action" data-open-mapping role="button" tabindex="0" aria-label="باز کردن پنجره اجرای نگاشت">
                                         <span class="software-icon" aria-hidden="true">▦</span>
                                         <span class="software-name">@software</span>
-                                        <button type="button" class="choose-software-button" data-open-mapping>
+                                        <button type="button" class="choose-software-button">
                                             انتخاب سرورها <span aria-hidden="true">←</span>
                                         </button>
                                     </div>
                                 }
                                 else
                                 {
-                                    <form asp-controller="Home" asp-action="SelectSoftware" method="post" class="software-item">
+                                    <form asp-controller="Home" asp-action="SelectSoftware" method="post" class="software-item software-item-form" data-software-form tabindex="0" aria-label="ورود به نرم‌افزار @software">
                                         @Html.AntiForgeryToken()
                                         <input type="hidden" name="groupName" value="@group.Key" />
                                         <input type="hidden" name="softwareName" value="@software" />
