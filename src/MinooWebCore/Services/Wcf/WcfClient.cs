@@ -91,7 +91,7 @@ public sealed class WcfClient(ILogger<WcfClient>? logger = null) : IWcfClient
 
         try
         {
-            factory = CreateFactory<TContract>(endpointUrl, binding);
+            factory = CreateFactory<TContract>(endpointUrl, binding);  
 
             stage = "CreateChannel";
             proxy = factory.CreateChannel();
@@ -163,8 +163,8 @@ public sealed class WcfClient(ILogger<WcfClient>? logger = null) : IWcfClient
             ReceiveTimeout = TimeSpan.FromHours(2),
             SendTimeout = TimeSpan.FromMinutes(15),
             BypassProxyOnLocal = true,
-            TransactionFlow = true,
-            HostNameComparisonMode = HostNameComparisonMode.StrongWildcard,
+            //TransactionFlow = true,
+            //HostNameComparisonMode = HostNameComparisonMode.StrongWildcard,
             MaxBufferPoolSize = 99_999_999,
             MaxReceivedMessageSize = 99_999_999,
             MessageEncoding = WSMessageEncoding.Text,
