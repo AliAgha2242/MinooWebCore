@@ -107,7 +107,7 @@ public sealed class WcfClient(ILogger<WcfClient>? logger = null) : IWcfClient
 
             stage = "CloseChannel";
             CloseCommunicationObject(proxy);
-
+             
             stage = "CloseFactory";
             CloseCommunicationObject(factory);
 

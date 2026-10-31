@@ -1,5 +1,6 @@
 using System.Globalization;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Components.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using MinooWebCore.Data.Models;
 using MinooWebCore.Persistence.StaticConfiguration;
@@ -139,9 +140,7 @@ public sealed class MappingController : ControllerBase
                 endpoint,
                 service => service.RunAsync(serviceRequest));
 
-            var success = response.ErrorCode == 0 &&
-                          response.ServiceResult is bool serviceResult &&
-                          serviceResult;
+            var success = response.ErrorCode == 0 && response.ServiceResult.ToString().ToLower() == "true";
 
             var responseMessage = success
                 ? "درخواست نگاشت با موفقیت به سرویس ارسال شد."
