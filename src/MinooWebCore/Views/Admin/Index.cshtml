@@ -32,10 +32,10 @@
                 <span class="admin-breadcrumb">MINOO / ADMINISTRATION</span>
                 <h1>پنل مدیریت</h1>
             </div>
-            <div class="admin-profile">
-                <span class="admin-profile-avatar">@(User.Identity?.Name?.Length > 0 ? User.Identity.Name[..1].ToUpperInvariant() : "م")</span>
+            <a class="admin-profile" asp-controller="Profile" asp-action="Index">
+                <span class="admin-profile-avatar" data-user-avatar>@(User.Identity?.Name?.Length > 0 ? User.Identity.Name[..1].ToUpperInvariant() : "م")</span>
                 <span>@User.Identity?.Name</span>
-            </div>
+            </a>
         </header>
 
         <div class="admin-welcome">
