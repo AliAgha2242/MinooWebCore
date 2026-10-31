@@ -26,7 +26,7 @@
         <div class="orbit orbit-one">
             @for (var i = 0; i < orbitCompanies.Length; i++)
             {
-                <div class="orbit-item" style="--i:@i; --count:@orbitCompanies.Length">
+                <div class="orbit-item" style="--angle:@(360.0 * i / orbitCompanies.Length)deg; --reverse-angle:@(-360.0 * i / orbitCompanies.Length)deg">
                     <div class="company-badge" title="@orbitCompanies[i].Name">
                         <img src="@Url.Content("~/images/logos/" + orbitCompanies[i].Logo)" alt="@orbitCompanies[i].Name" loading="eager" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" />
                         <span>@orbitCompanies[i].Name</span>
