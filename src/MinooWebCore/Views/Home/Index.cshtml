@@ -15,7 +15,8 @@
         </a>
         <div class="groups-user">
             <a class="admin-shortcut" asp-controller="Admin" asp-action="Index">پنل مدیریت <span aria-hidden="true">↗</span></a>
-            <span class="user-avatar">@(User.Identity?.Name?.Length > 0 ? User.Identity.Name[..1].ToUpperInvariant() : "م")</span>
+            <a class="admin-shortcut" asp-controller="Profile" asp-action="Index">پنل کاربری <span aria-hidden="true">↗</span></a>
+            <span class="user-avatar" data-user-avatar>@(User.Identity?.Name?.Length > 0 ? User.Identity.Name[..1].ToUpperInvariant() : "م")</span>
             <span>@User.Identity?.Name</span>
             <form asp-controller="Account" asp-action="Logout" method="post">
                 @Html.AntiForgeryToken()
