@@ -17,7 +17,8 @@ public sealed class MinooDbContext(DbContextOptions<MinooDbContext> options) : D
         modelBuilder.Entity<UserModel>(entity =>
         {
             entity.ToTable("Users");
-            entity.HasKey(x => x.UserKeyId);
+            entity.HasKey(x => x.UsersKeyId);
         });
+        modelBuilder.Entity<UserModel>().Ignore(p => p.VahedeTejariSn);
     }
 }
