@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using MinooWebCore.Data.Models;
 
 namespace MinooWebCore.Data;
 
@@ -7,4 +8,6 @@ namespace MinooWebCore.Data;
 /// </summary>
 public sealed class MinooDbContext(DbContextOptions<MinooDbContext> options) : DbContext(options)
 {
+    public DbSet<UserModel> Users {  get; set; }
+
 }

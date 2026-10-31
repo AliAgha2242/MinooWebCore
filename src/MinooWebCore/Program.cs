@@ -2,17 +2,14 @@ using MinooWebCore.Data;
 using MinooWebCore.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using MinooWebCore.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<IAuthenticateService, AuthenticateService>();
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' was not configured.");
-
-builder.Services.AddDbContext<MinooDbContext>(options =>
-    options.UseSqlServer(connectionString, sqlOptions => sqlOptions.CommandTimeout(0)));
+builder.Services.infrasreg(builder.Configuration);
 
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
