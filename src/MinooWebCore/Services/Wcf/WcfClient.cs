@@ -2,7 +2,6 @@ using System.Diagnostics;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
 using System.Text;
-using System.Xml;
 using Microsoft.Extensions.Logging;
 
 namespace MinooWebCore.Services.Wcf;
@@ -144,39 +143,47 @@ public sealed class WcfClient(ILogger<WcfClient>? logger = null) : IWcfClient
     }
 
     /// <summary>
-    /// The SanadMali endpoint publishes a SOAP 1.2 binding over HTTP.
-    /// BasicHttpBinding sends SOAP 1.1 (text/xml), which is incompatible
-    /// with this endpoint. Use SOAP 1.2 without WS-Addressing.
+    /// The target service is configured with wsHttpBinding. This binding uses
+    /// SOAP 1.2 with WS-Addressing; a SOAP 1.2 CustomBinding without addressing
+    /// is not wire-compatible with that endpoint.
     /// </summary>
     private static Binding CreateDefaultBinding(Uri endpoint)
     {
-        var encoding = new TextMessageEncodingBindingElement(
-            MessageVersion.Soap12,
-            Encoding.UTF8)
+        if (!endpoint.Scheme.Equals(Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase) &&
+            !endpoint.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
         {
-            ReaderQuotas = XmlDictionaryReaderQuotas.Max
+            throw new NotSupportedException(
+                $"The WCF endpoint scheme '{endpoint.Scheme}' is not supported by WSHttpBinding.");
+        }
+
+        var binding = new WSHttpBinding(SecurityMode.None)
+        {
+            CloseTimeout = TimeSpan.FromMinutes(1),
+            OpenTimeout = TimeSpan.FromMinutes(1),
+            ReceiveTimeout = TimeSpan.FromHours(2),
+            SendTimeout = TimeSpan.FromMinutes(15),
+            BypassProxyOnLocal = true,
+            TransactionFlow = true,
+            HostNameComparisonMode = HostNameComparisonMode.StrongWildcard,
+            MaxBufferPoolSize = 99_999_999,
+            MaxReceivedMessageSize = 99_999_999,
+            MessageEncoding = WSMessageEncoding.Text,
+            TextEncoding = Encoding.UTF8,
+            UseDefaultWebProxy = true,
+            AllowCookies = false
         };
 
-        TransportBindingElement transport = endpoint.Scheme.Equals(
-            Uri.UriSchemeHttps,
-            StringComparison.OrdinalIgnoreCase)
-                ? new HttpsTransportBindingElement()
-                : new HttpTransportBindingElement();
+        binding.ReaderQuotas.MaxDepth = 99;
+        binding.ReaderQuotas.MaxStringContentLength = 99_999_999;
+        binding.ReaderQuotas.MaxArrayLength = 99_999_999;
+        binding.ReaderQuotas.MaxBytesPerRead = 99_999_999;
+        binding.ReaderQuotas.MaxNameTableCharCount = 99_999_999;
 
-        transport.MaxReceivedMessageSize = 10 * 1024 * 1024;
+        binding.ReliableSession.Ordered = true;
+        binding.ReliableSession.InactivityTimeout = TimeSpan.FromMinutes(15);
+        binding.ReliableSession.Enabled = false;
 
-        if (transport is HttpTransportBindingElement httpTransport)
-            httpTransport.MaxBufferSize = 10 * 1024 * 1024;
-
-        return new CustomBinding(encoding, transport)
-        {
-            // TimeSpan.MaxValue disables the WCF client-side operation time limits.
-            // Calls can remain pending indefinitely if the remote service never responds.
-            OpenTimeout = TimeSpan.MaxValue,
-            CloseTimeout = TimeSpan.MaxValue,
-            SendTimeout = TimeSpan.MaxValue,
-            ReceiveTimeout = TimeSpan.MaxValue
-        };
+        return binding;
     }
 
     private static void CloseCommunicationObject(object? value)
