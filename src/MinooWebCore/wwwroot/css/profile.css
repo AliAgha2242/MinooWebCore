@@ -19,3 +19,17 @@
 .profile-page[data-theme="light"]{--profile-bg:#f1f5fa;--profile-card:#fff;--profile-text:#17283c;color:#17283c}.profile-page[data-theme="light"] .profile-card{border-color:#dce5ef;box-shadow:0 10px 30px rgba(25,50,80,.06)}.profile-page[data-theme="light"] .theme-option,.profile-page[data-theme="light"] .avatar-option{color:#17283c;border-color:#d5dfeb}
 .profile-page[data-theme="blue"]{--profile-bg:#06283f;--profile-card:#0a3a56;--profile-text:#e9f7ff}
 @media(max-width:600px){.profile-content{margin:42px auto}.profile-card{padding:18px}.profile-heading h1{font-size:26px}.profile-header{gap:14px}.profile-back{font-size:11px}.profile-footer{gap:12px;font-size:10px}}
+/* Apply the selected appearance to the portal and administration pages too. */
+html[data-theme="light"] body{background:#f1f5fa;color:#17283c}
+html[data-theme="light"] .groups-page{background:linear-gradient(135deg,#f3f7fc,#e7eef7 55%,#f8fbff);color:#17283c}
+html[data-theme="light"] .groups-page .groups-intro p,html[data-theme="light"] .groups-page .groups-footnote{color:#60758b}
+html[data-theme="light"] .groups-page .group-accordion,html[data-theme="light"] .groups-page .group-details{background:#fff;border-color:#d8e2ed;color:#17283c}
+html[data-theme="light"] .groups-page .group-title,html[data-theme="light"] .groups-page .software-name{color:#17283c}
+html[data-theme="light"] .admin-page{background:#eef3f8;color:#17283c}
+html[data-theme="light"] .admin-sidebar{background:#fff;border-color:#d8e2ed}
+html[data-theme="light"] .admin-sidebar .admin-brand,html[data-theme="light"] .admin-sidebar .admin-menu-link{color:#29445f}
+html[data-theme="light"] .admin-main .admin-welcome,html[data-theme="light"] .admin-main .admin-stat-card,html[data-theme="light"] .admin-main .admin-placeholder{background:#fff;border-color:#d8e2ed;color:#17283c}
+html[data-theme="light"] .admin-main .admin-welcome p,html[data-theme="light"] .admin-main .admin-notice{color:#60758b}
+html[data-theme="blue"] .groups-page{background:linear-gradient(135deg,#06283f,#0a4560 55%,#06283f)}
+html[data-theme="blue"] .admin-page{background:#06283f}
+html[data-theme="blue"] .admin-sidebar{background:#052238}
