@@ -1,5 +1,7 @@
 using System.ServiceModel;
 using System.ServiceModel.Channels;
+using System.Text;
+using System.Xml;
 
 namespace MinooWebCore.Services.Wcf;
 
@@ -75,15 +77,36 @@ public sealed class WcfClient : IWcfClient
         return new ChannelFactory<TContract>(binding, new EndpointAddress(endpoint));
     }
 
+    /// <summary>
+    /// The SanadMali endpoint publishes a SOAP 1.2 binding over HTTP.
+    /// BasicHttpBinding sends SOAP 1.1 (text/xml), which is incompatible
+    /// with this endpoint. Use SOAP 1.2 without WS-Addressing.
+    /// </summary>
     private static Binding CreateDefaultBinding(Uri endpoint)
     {
-        var securityMode = endpoint.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase)
-            ? BasicHttpSecurityMode.Transport
-            : BasicHttpSecurityMode.None;
-
-        return new BasicHttpBinding(securityMode)
+        var encoding = new TextMessageEncodingBindingElement(
+            MessageVersion.Soap12,
+            Encoding.UTF8)
         {
-            MaxReceivedMessageSize = 10 * 1024 * 1024,
+            ReaderQuotas = XmlDictionaryReaderQuotas.Max
+        };
+
+        TransportBindingElement transport = endpoint.Scheme.Equals(
+            Uri.UriSchemeHttps,
+            StringComparison.OrdinalIgnoreCase)
+                ? new HttpsTransportBindingElement()
+                : new HttpTransportBindingElement();
+
+        transport.MaxReceivedMessageSize = 10 * 1024 * 1024;
+
+        if (transport is HttpTransportBindingElement httpTransport)
+            httpTransport.MaxBufferSize = 10 * 1024 * 1024;
+
+        if (transport is HttpsTransportBindingElement httpsTransport)
+            httpsTransport.MaxBufferSize = 10 * 1024 * 1024;
+
+        return new CustomBinding(encoding, transport)
+        {
             OpenTimeout = TimeSpan.FromSeconds(30),
             CloseTimeout = TimeSpan.FromSeconds(30),
             SendTimeout = TimeSpan.FromMinutes(2),
