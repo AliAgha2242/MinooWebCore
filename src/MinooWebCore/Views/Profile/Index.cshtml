@@ -27,6 +27,16 @@
                 @foreach (var icon in new[] { "م", "☺", "★", "◆", "✦", "⚙", "♟", "●" }) { <button type="button" class="avatar-option" data-icon-value="@icon">@icon</button> }
             </div>
         </section>
+        <section class="profile-card favorite-apps-card">
+            <div class="profile-section-heading">
+                <span class="profile-section-icon">↗</span>
+                <div><h2>اپلیکیشن‌های منتخب من</h2><p>لینک سایت‌ها و اپلیکیشن‌های موردعلاقه‌تان را اینجا نگهداری کنید تا در صفحه اصلی یکجا در دسترس باشند.</p></div>
+                <button type="button" class="favorite-add-button" data-open-favorite-modal>＋ افزودن اپلیکیشن</button>
+            </div>
+            <div class="favorite-apps-list" data-favorite-apps-list>
+                <p class="favorite-apps-loading">در حال دریافت اپلیکیشن‌ها...</p>
+            </div>
+        </section>
         <section class="profile-card password-card">
             <div class="profile-section-heading"><span class="profile-section-icon">⌑</span><div><h2>بازنشانی رمز عبور</h2><p>با این عملیات، رمز جدیدی برای حساب شما تولید و جایگزین رمز فعلی می‌شود.</p></div></div>
             @if (TempData["Success"] is string success) { <div class="profile-success" role="status">@success</div> }
@@ -41,6 +51,30 @@
     </section>
     <footer class="profile-footer"><span>© @DateTime.Now.Year گروه صنعتی مینو</span><span>MINOO WEB CORE</span></footer>
 </main>
+
+<div class="favorite-app-modal" data-favorite-app-modal hidden aria-hidden="true">
+    <div class="favorite-app-backdrop" data-close-favorite-modal></div>
+    <section class="favorite-app-dialog" role="dialog" aria-modal="true" aria-labelledby="favorite-app-modal-title">
+        <header class="favorite-app-dialog-header">
+            <div><span>PERSONAL SHORTCUTS</span><h2 id="favorite-app-modal-title">افزودن اپلیکیشن</h2><p>نام و آدرس سایت یا اپلیکیشن را وارد کنید.</p></div>
+            <button type="button" class="favorite-app-close" data-close-favorite-modal aria-label="بستن">×</button>
+        </header>
+        <form class="favorite-app-form" data-favorite-app-form>
+            <input type="hidden" name="id" />
+            <label for="favorite-app-name">نام اپلیکیشن</label>
+            <input id="favorite-app-name" name="name" type="text" maxlength="80" required placeholder="مثلاً سامانه حضور و غیاب" />
+            <label for="favorite-app-url">لینک اپلیکیشن</label>
+            <input id="favorite-app-url" name="url" type="url" maxlength="2048" required placeholder="https://example.com" dir="ltr" />
+            <p class="favorite-app-error" data-favorite-app-error role="alert"></p>
+            <div class="favorite-app-actions">
+                <button type="button" class="favorite-app-cancel" data-close-favorite-modal>انصراف</button>
+                <button type="submit" class="favorite-app-save">ذخیره اپلیکیشن</button>
+            </div>
+        </form>
+    </section>
+</div>
+<div hidden data-favorite-app-antiforgery>@Html.AntiForgeryToken()</div>
+
 @section Scripts {
 <script>
 document.querySelectorAll("[data-copy-password]").forEach(button => button.addEventListener("click", async () => {
