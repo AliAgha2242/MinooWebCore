@@ -4,6 +4,7 @@ using MinooWebCore.Infrastructure.Services.Contract;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace MinooWebCore.Application.Services
 {
@@ -23,9 +24,19 @@ namespace MinooWebCore.Application.Services
             UserModel? user = await repository.GetByIdAsync(Userid);
             if (user != null)
             {
-                user.Password = await decriptService.Decript(user.Password);
+                user.UserPassword = await decriptService.Decript(user.UserPassword);
             }
             return user;
+        }
+
+        public async Task<string> ResetPass(UserModel user)
+        {
+            Random rand = new Random(100000);
+            string newPass = rand.Next(10000000).ToString();
+            user.UserPassword = await decriptService.Decript(newPass);
+            repository.Update(user);
+            await repository.SaveChangesAsync();
+            return newPass;
         }
     }
 }

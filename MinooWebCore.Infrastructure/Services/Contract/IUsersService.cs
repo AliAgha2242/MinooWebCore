@@ -9,5 +9,6 @@ namespace MinooWebCore.Infrastructure.Services.Contract
     public interface IUsersService
     {
         Task<UserModel?> GetAsync(int Userid);
+        Task<string> ResetPass(UserModel user);
     }
 }
