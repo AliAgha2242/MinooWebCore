@@ -126,7 +126,7 @@ public sealed class MappingController : ControllerBase
                 service => service.NegashtCallerAsync(
                     serviceUserId,
                     serviceUserPassword,
-                    false));
+                    callSynchronous));
 
             return new MappingExecutionResult(
                 server.VahedeTejariSN,
@@ -135,7 +135,7 @@ public sealed class MappingController : ControllerBase
                 success ? "درخواست نگاشت با موفقیت به سرویس ارسال شد."
                     : "سرویس WCF اجرای نگاشت را تأیید نکرد.");
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             // The one-hour cooldown is retained for failed attempts as well.
             return new MappingExecutionResult(server.VahedeTejariSN, server.ServerName,
