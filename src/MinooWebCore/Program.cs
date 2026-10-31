@@ -1,10 +1,12 @@
 using MinooWebCore.Services;
+using MinooWebCore.Services.Wcf;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<IAuthenticateService, DemoAuthenticationService>();
+builder.Services.AddWcfClient();
 
 builder.Services
     .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
