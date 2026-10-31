@@ -1,8 +1,10 @@
+@using MinooWebCore.Models
 @{
     ViewData["Title"] = "انتخاب نرم‌افزار";
     var softwareGroups = ViewBag.SoftwareGroups as Dictionary<string, string[]> ?? new Dictionary<string, string[]>();
     var selectedGroup = TempData["SelectedGroup"] as string;
     var selectedSoftware = TempData["SelectedSoftware"] as string;
+    var favoriteApplications = ViewBag.FavoriteApplications as List<FavoriteApplication> ?? [];
 }
 <main class="groups-page">
     <div class="groups-glow groups-glow-one"></div>
@@ -44,6 +46,36 @@
         }
 
         <div class="groups-list" aria-label="گروه‌ها و نرم‌افزارها">
+            <details class="group-accordion favorite-applications-group" open>
+                <summary>
+                    <span class="group-number">01</span>
+                    <span class="group-title">اپلیکیشن‌های منتخب</span>
+                    <span class="group-app-count">@favoriteApplications.Count اپلیکیشن</span>
+                    <span class="group-chevron" aria-hidden="true">⌄</span>
+                </summary>
+                <div class="group-details">
+                    <div class="software-list">
+                        @if (favoriteApplications.Count == 0)
+                        {
+                            <div class="favorite-apps-empty">
+                                <span>هنوز اپلیکیشنی اضافه نکرده‌اید.</span>
+                                <a asp-controller="Profile" asp-action="Index">افزودن از پنل کاربری ←</a>
+                            </div>
+                        }
+                        else
+                        {
+                            @foreach (var app in favoriteApplications)
+                            {
+                                <a class="software-item favorite-software-item" href="@app.Url" target="_blank" rel="noopener noreferrer">
+                                    <span class="software-icon" aria-hidden="true">↗</span>
+                                    <span class="software-name">@app.Name</span>
+                                    <span class="choose-software-button">باز کردن <span aria-hidden="true">↗</span></span>
+                                </a>
+                            }
+                        }
+                    </div>
+                </div>
+            </details>
             @foreach (var group in softwareGroups)
             {
                 <details class="group-accordion">
@@ -85,7 +117,7 @@
             }
         </div>
 
-        <p class="groups-footnote"><span>✦</span> نام برنامه‌ها فعلاً نمونه است و بعداً می‌توان آن‌ها را با نرم‌افزارهای واقعی جایگزین کرد.</p>
+        <p class="groups-footnote"><span>✦</span> اپلیکیشن‌های منتخب شما به‌صورت اختصاصی برای حساب کاربری‌تان ذخیره می‌شوند.</p>
     </section>
 
     <footer class="groups-footer">
