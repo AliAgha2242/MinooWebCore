@@ -121,19 +121,35 @@ public sealed class MappingController : ControllerBase
                 Path = EndpointPath
             }.Uri.AbsoluteUri;
 
-            var success = await _wcfClient.InvokeAsync<ISanadMaliWebService, bool>(
+            var serviceRequest = new ServiceRequest
+            {
+                ServiceName = "NegashtWebService",
+                ServiceCommand = "NegashtCaller",
+                ConsumerUsername = serviceUserId,
+                ConsumerPassword = serviceUserPassword
+            };
+
+            serviceRequest.SetArguments(serviceUserId, serviceUserPassword, callSynchronous);
+
+            var response = await _wcfClient.InvokeAsync<IBaseService, ServiceResponse>(
                 endpoint,
-                service => service.NegashtCallerAsync(
-                    serviceUserId,
-                    serviceUserPassword,
-                    callSynchronous));
+                service => service.RunAsync(serviceRequest));
+
+            var success = response.ErrorCode == 0 &&
+                          response.ServiceResult is bool serviceResult &&
+                          serviceResult;
+
+            var responseMessage = success
+                ? "درخواست نگاشت با موفقیت به سرویس ارسال شد."
+                : response.ErrorCode != 0
+                    ? $"سرویس WCF خطا برگرداند (کد {response.ErrorCode})."
+                    : "سرویس WCF اجرای نگاشت را تأیید نکرد.";
 
             return new MappingExecutionResult(
                 server.VahedeTejariSN,
                 server.ServerName,
                 success ? "Success" : "Failed",
-                success ? "درخواست نگاشت با موفقیت به سرویس ارسال شد."
-                    : "سرویس WCF اجرای نگاشت را تأیید نکرد.");
+                responseMessage);
         }
         catch (Exception)
         {
