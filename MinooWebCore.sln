@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.0.11205.157 d18.0
+VisualStudioVersion = 18.0.11205.157
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MinooWebCore", "src\MinooWebCore\MinooWebCore.csproj", "{B12F1D8B-9D12-4A54-8B61-6B8C0E43F9C1}"
 EndProject
@@ -9,6 +9,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MinooWebCore.Infrastructure", "MinooWebCore.Infrastructure\MinooWebCore.Infrastructure.csproj", "{F0A46CF8-8FD5-49C4-AC48-C08692DACB4A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MinooWebCore.Application", "MinooWebCore.Application\MinooWebCore.Application.csproj", "{CA37F85E-9775-408A-AC89-DDC1BE8FD37D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MinooWebCore.Persistense", "MinooWebCore.Persistense\MinooWebCore.Persistense.csproj", "{6CFF0579-0E62-48AF-9884-2798E531FF27}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,6 +34,10 @@ Global
 		{CA37F85E-9775-408A-AC89-DDC1BE8FD37D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CA37F85E-9775-408A-AC89-DDC1BE8FD37D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CA37F85E-9775-408A-AC89-DDC1BE8FD37D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6CFF0579-0E62-48AF-9884-2798E531FF27}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6CFF0579-0E62-48AF-9884-2798E531FF27}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6CFF0579-0E62-48AF-9884-2798E531FF27}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6CFF0579-0E62-48AF-9884-2798E531FF27}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

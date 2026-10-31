@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 namespace MinooWebCore.Controllers;
 
 [Authorize]
-[Route("Admin")]
 public sealed class AdminController : Controller
 {
     private static readonly (string Key, string Title, string Description, string Icon)[] MenuItems =
@@ -18,7 +17,6 @@ public sealed class AdminController : Controller
         ("settings", "تنظیمات سامانه", "تنظیمات عمومی Minoo Web Core", "⚙")
     ];
 
-    [HttpGet("")]
     public IActionResult Index(string section = "dashboard")
     {
         var selected = MenuItems.FirstOrDefault(item => item.Key == section);

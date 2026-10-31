@@ -23,7 +23,7 @@
                 </a>
             }
         </nav>
-        <a class="admin-back-link" asp-controller="Home" asp-action="Index"><span>←</span> بازگشت به انتخاب نرم‌افزار</a>
+        <a class="admin-back-link" href="@Url.Action("Index", "Home")" onclick="if (window.history.length > 1) { window.history.back(); return false; }"><span>←</span> بازگشت به صفحه قبل</a>
     </aside>
 
     <section class="admin-main">

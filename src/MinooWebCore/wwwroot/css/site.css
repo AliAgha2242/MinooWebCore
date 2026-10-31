@@ -215,3 +215,70 @@ h1 { font-size: 21px; line-height: 1.4; text-align: center; margin: 0; font-weig
   .software-name { font-size: 11px; }
   .choose-software-button { padding: 0 9px; }
 }
+
+
+/* Mapping execution dialog */
+.mapping-modal[hidden] { display: none !important; }
+.mapping-modal { position: fixed; z-index: 1000; inset: 0; display: grid; place-items: center; padding: 22px; }
+.mapping-backdrop { position: absolute; inset: 0; background: rgba(1, 8, 16, .78); backdrop-filter: blur(9px); }
+.mapping-dialog { position: relative; width: min(100%, 920px); max-height: min(86vh, 760px); overflow: auto; border: 1px solid rgba(120, 194, 226, .24); border-radius: 22px; background: linear-gradient(145deg, #10283e, #091a2b 75%); box-shadow: 0 35px 100px rgba(0,0,0,.55), inset 0 1px rgba(255,255,255,.06); direction: rtl; }
+.mapping-dialog-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; padding: 24px 26px 18px; border-bottom: 1px solid rgba(171,204,229,.12); }
+.mapping-kicker { color: #65d6d6; font-size: 9px; letter-spacing: 1.8px; }
+.mapping-dialog-header h2 { margin: 5px 0 2px; font-size: 21px; }
+.mapping-dialog-header p { margin: 0; color: #8fa9be; font-size: 11px; }
+.mapping-close { flex: 0 0 34px; width: 34px; height: 34px; border: 1px solid rgba(171,204,229,.18); border-radius: 10px; color: #b5c8d8; background: rgba(255,255,255,.035); cursor: pointer; font-size: 23px; line-height: 1; }
+.mapping-close:hover { color: white; border-color: rgba(105,224,223,.5); }
+.mapping-modal-layout { display: grid; grid-template-columns: minmax(250px, 310px) minmax(0, 1fr); direction: ltr; min-height: 360px; }
+.mapping-servers-panel { padding: 20px; border-right: 1px solid rgba(171,204,229,.12); direction: rtl; background: rgba(3,14,25,.24); }
+.mapping-panel-heading { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 13px; }
+.mapping-panel-heading strong { font-size: 12px; }
+.mapping-panel-heading span { color: #7797af; font-size: 10px; }
+.mapping-server-list { display: grid; gap: 8px; max-height: 390px; overflow: auto; padding-left: 3px; }
+.mapping-server-option { display: flex; align-items: center; gap: 10px; padding: 11px 10px; border: 1px solid rgba(158,196,222,.13); border-radius: 11px; background: rgba(255,255,255,.025); cursor: pointer; transition: border-color .2s, background .2s; }
+.mapping-server-option:hover { border-color: rgba(105,224,223,.38); background: rgba(34,110,137,.13); }
+.mapping-server-option:has(input:checked) { border-color: rgba(91,205,218,.55); background: rgba(33,129,157,.15); }
+.mapping-server-option input { accent-color: #35b8d0; width: 16px; height: 16px; flex: 0 0 16px; }
+.mapping-server-copy { min-width: 0; flex: 1; }
+.mapping-server-copy strong, .mapping-server-copy small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mapping-server-copy strong { color: #e8f3fb; font-size: 11px; }
+.mapping-server-copy small { margin-top: 3px; color: #7898b1; font-size: 9px; direction: ltr; text-align: right; }
+.mapping-server-option.is-limited { opacity: .58; cursor: not-allowed; }
+.mapping-server-option.is-limited input { cursor: not-allowed; }
+.mapping-server-state { color: #72dfbd; font-size: 9px; white-space: nowrap; }
+.mapping-server-option.is-limited .mapping-server-state { color: #f0bd78; }
+.mapping-empty { color: #8fa9be; font-size: 11px; line-height: 1.9; }
+.mapping-main-panel { display: flex; flex-direction: column; padding: 22px 24px; direction: rtl; }
+.mapping-info { display: flex; align-items: center; gap: 10px; padding: 12px; border: 1px solid rgba(86,174,204,.2); border-radius: 11px; color: #9fc8d9; background: rgba(26,104,132,.1); font-size: 10px; line-height: 1.8; }
+.mapping-info-icon { display: grid; place-items: center; flex: 0 0 20px; width: 20px; height: 20px; border-radius: 50%; color: #7fe4df; background: rgba(105,224,223,.12); font-weight: 700; }
+.mapping-selection-summary { margin: 18px 0 12px; color: #9ab2c5; font-size: 11px; }
+.mapping-results { display: grid; gap: 8px; }
+.mapping-result-item { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; border: 1px solid rgba(158,196,222,.12); border-radius: 10px; background: rgba(255,255,255,.025); font-size: 10px; }
+.mapping-result-item strong { color: #e6f1f8; font-size: 10px; }
+.mapping-result-item span { color: #a7bdce; text-align: left; }
+.mapping-result-item.is-success span { color: #75dfb9; }
+.mapping-result-item.is-warning span { color: #f0c17e; }
+.mapping-result-item.is-error span { color: #ff9e9e; }
+.mapping-actions { display: flex; justify-content: flex-start; align-items: center; gap: 9px; margin-top: auto; padding-top: 22px; }
+.mapping-submit-button, .mapping-secondary-button { display: inline-flex; align-items: center; justify-content: center; gap: 12px; min-height: 40px; padding: 0 15px; border-radius: 10px; cursor: pointer; font-size: 10px; transition: filter .2s, opacity .2s; }
+.mapping-submit-button { border: 1px solid rgba(137,220,250,.32); color: white; background: linear-gradient(100deg, #1676bd, #1b9bc8 65%, #29aeb7); box-shadow: 0 8px 20px rgba(18,132,190,.15); }
+.mapping-submit-button:hover:not(:disabled) { filter: brightness(1.12); }
+.mapping-submit-button:disabled { opacity: .42; cursor: not-allowed; }
+.mapping-secondary-button { border: 1px solid rgba(171,204,229,.18); color: #a9bfd1; background: rgba(255,255,255,.025); }
+.mapping-secondary-button:hover { color: white; border-color: rgba(171,204,229,.4); }
+@media (max-width: 680px) {
+  .mapping-modal { padding: 10px; }
+  .mapping-dialog { max-height: 94vh; border-radius: 16px; }
+  .mapping-dialog-header { padding: 18px 16px 14px; }
+  .mapping-modal-layout { grid-template-columns: 1fr; direction: rtl; }
+  .mapping-servers-panel { border-right: 0; border-bottom: 1px solid rgba(171,204,229,.12); padding: 15px; }
+  .mapping-server-list { max-height: 190px; grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .mapping-server-option { padding: 9px 7px; gap: 7px; }
+  .mapping-server-copy strong { font-size: 10px; }
+  .mapping-main-panel { padding: 16px; min-height: 220px; }
+  .mapping-actions { flex-wrap: wrap; }
+  .mapping-submit-button { flex: 1; }
+}
+@media (max-width: 420px) {
+  .mapping-server-list { grid-template-columns: 1fr; }
+  .mapping-result-item { align-items: flex-start; flex-direction: column; gap: 5px; }
+}
