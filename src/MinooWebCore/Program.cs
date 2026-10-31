@@ -1,17 +1,17 @@
+using MinooWebCore.Application.Services;
 using MinooWebCore.Data;
+using MinooWebCore.Infrastructure;
+using MinooWebCore.Infrastructure.Services.Contract;
 using MinooWebCore.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.EntityFrameworkCore;
-using MinooWebCore.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
-builder.Services.AddScoped<IAuthenticateService, AuthenticateService>();
-
 builder.Services.infrasreg(builder.Configuration);
-
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddScoped<IUsersService, UsersService>();
+builder.Services.AddScoped<IAuthenticateService, AuthenticateService>();
 
 builder.Services
     .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
