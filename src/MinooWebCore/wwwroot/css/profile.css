@@ -1,0 +1,21 @@
+.profile-page{min-height:100vh;padding:28px clamp(18px,5vw,72px) 20px;background:var(--profile-bg,#091729);color:var(--profile-text,#edf4ff);transition:background .2s,color .2s}
+.profile-header{max-width:1120px;margin:auto;display:flex;align-items:center;justify-content:space-between}
+.profile-brand{display:flex;align-items:center;gap:12px;color:inherit;text-decoration:none}
+.profile-brand .brand-mark{font-size:28px;font-weight:800;color:#fff}.profile-brand .brand-mark span{color:#55d6bd}
+.profile-brand .brand-copy{display:grid;line-height:1.2}.profile-brand .brand-copy strong{letter-spacing:3px}.profile-brand .brand-copy span{font-size:10px;letter-spacing:2px;opacity:.6}
+.profile-back{color:#9fc2e7;text-decoration:none;font-size:13px}.profile-back span{margin-right:8px}
+.profile-content{max-width:900px;margin:64px auto 70px}
+.profile-heading{margin-bottom:28px}.profile-eyebrow,.profile-card-label{font-size:11px;letter-spacing:2px;color:#61cdbb}.profile-heading h1{font-size:32px;margin:10px 0}.profile-heading p,.profile-section-heading p,.account-card p{color:#91a8c2;margin:6px 0 0;font-size:13px}
+.profile-card{background:var(--profile-card,#10243b);border:1px solid rgba(160,190,220,.13);border-radius:18px;padding:24px;margin:16px 0;box-shadow:0 12px 35px rgba(0,0,0,.12)}
+.account-card{display:flex;align-items:center;gap:18px}.profile-avatar-preview{width:62px;height:62px;border-radius:18px;display:grid;place-items:center;background:linear-gradient(145deg,#1e8c8a,#2855a0);font-size:25px;font-weight:700;color:white}
+.account-card h2{font-size:20px;margin:6px 0}
+.profile-section-heading{display:flex;align-items:center;gap:14px;margin-bottom:22px}.profile-section-heading h2{font-size:17px;margin:0}.profile-section-icon{width:40px;height:40px;display:grid;place-items:center;border-radius:12px;background:rgba(74,190,177,.13);color:#6ed8c4;font-size:22px}
+.theme-options{display:flex;gap:14px;flex-wrap:wrap}.theme-option{min-width:112px;padding:12px;border:1px solid rgba(150,180,210,.2);border-radius:13px;background:transparent;color:inherit;display:grid;justify-items:center;gap:7px;cursor:pointer}.theme-option strong{font-size:13px}.theme-option small{opacity:.55}.theme-option.selected,.avatar-option.selected{border-color:#55cdb9;box-shadow:0 0 0 2px rgba(85,205,185,.14)}
+.theme-swatch{width:62px;height:38px;border-radius:8px;border:1px solid rgba(255,255,255,.15)}.theme-dark{background:linear-gradient(90deg,#091729 50%,#18334e 50%)}.theme-light{background:linear-gradient(90deg,#f5f7fb 50%,#dce5f1 50%)}.theme-blue{background:linear-gradient(90deg,#082d49 50%,#087c91 50%)}
+.avatar-options{display:flex;gap:10px;flex-wrap:wrap}.avatar-option{width:48px;height:48px;border-radius:14px;border:1px solid rgba(150,180,210,.2);background:rgba(255,255,255,.035);color:inherit;font-size:21px;cursor:pointer}
+.reset-password-button,.copy-password{border:0;border-radius:10px;background:#168d82;color:white;padding:12px 18px;font:inherit;font-size:13px;cursor:pointer}.reset-password-button span{margin-right:8px;font-size:18px}
+.profile-success{padding:11px 14px;border-radius:10px;background:rgba(33,160,115,.13);color:#76dfb5;margin-bottom:14px;font-size:13px}
+.new-password-result{display:grid;gap:8px;background:rgba(30,160,130,.1);border:1px solid rgba(80,210,170,.25);border-radius:12px;padding:16px;margin-bottom:16px}.new-password-result>span,.new-password-result small{font-size:12px;color:#9eb6c9}.new-password-result strong{font-size:23px;letter-spacing:2px;color:#7be0bf}.copy-password{justify-self:start;padding:8px 14px}.profile-footer{max-width:1120px;margin:auto;display:flex;justify-content:space-between;color:#7189a4;font-size:11px}
+.profile-page[data-theme="light"]{--profile-bg:#f1f5fa;--profile-card:#fff;--profile-text:#17283c;color:#17283c}.profile-page[data-theme="light"] .profile-card{border-color:#dce5ef;box-shadow:0 10px 30px rgba(25,50,80,.06)}.profile-page[data-theme="light"] .theme-option,.profile-page[data-theme="light"] .avatar-option{color:#17283c;border-color:#d5dfeb}
+.profile-page[data-theme="blue"]{--profile-bg:#06283f;--profile-card:#0a3a56;--profile-text:#e9f7ff}
+@media(max-width:600px){.profile-content{margin:42px auto}.profile-card{padding:18px}.profile-heading h1{font-size:26px}.profile-header{gap:14px}.profile-back{font-size:11px}.profile-footer{gap:12px;font-size:10px}}
