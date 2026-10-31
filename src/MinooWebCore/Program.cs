@@ -5,6 +5,7 @@ using MinooWebCore.Infrastructure.Services.Contract;
 using MinooWebCore.Services;
 using MinooWebCore.Services.Wcf;
 using MinooWebCore.Persistence.StaticConfiguration;
+using MinooWebCore.Services.Redis;
 using StackExchange.Redis;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
@@ -20,6 +21,7 @@ builder.Services.AddSingleton<IMinooConfiguration>(_ => new MinooConfiguration()
 builder.Services.AddSingleton<IConnectionMultiplexer>(_ =>
     ConnectionMultiplexer.Connect(
         builder.Configuration["Redis:ConnectionString"] ?? "localhost:6379,abortConnect=false"));
+builder.Services.AddSingleton<IRedisService, RedisService>();
 builder.Services.AddAntiforgery(options =>
 {
     options.HeaderName = "RequestVerificationToken";
