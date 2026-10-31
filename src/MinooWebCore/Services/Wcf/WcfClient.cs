@@ -102,9 +102,6 @@ public sealed class WcfClient : IWcfClient
         if (transport is HttpTransportBindingElement httpTransport)
             httpTransport.MaxBufferSize = 10 * 1024 * 1024;
 
-        if (transport is HttpsTransportBindingElement httpsTransport)
-            httpsTransport.MaxBufferSize = 10 * 1024 * 1024;
-
         return new CustomBinding(encoding, transport)
         {
             OpenTimeout = TimeSpan.FromSeconds(30),
