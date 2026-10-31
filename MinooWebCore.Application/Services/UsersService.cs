@@ -1,42 +1,50 @@
-﻿using MinooWebCore.Data;
+using System.Security.Cryptography;
+using MinooWebCore.Data;
 using MinooWebCore.Data.Models;
 using MinooWebCore.Infrastructure.Services.Contract;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace MinooWebCore.Application.Services
+namespace MinooWebCore.Application.Services;
+
+public sealed class UsersService : IUsersService
 {
-    public class UsersService : IUsersService
+    private readonly IGenericRepository<UserModel> _repository;
+    private readonly IDecriptServices _decryptService;
+
+    public UsersService(IDecriptServices decryptService, IGenericRepository<UserModel> repository)
     {
-        public IGenericRepository<UserModel> repository { get; set; }
-        public IDecriptServices decriptService { get; set; }
+        _decryptService = decryptService;
+        _repository = repository;
+    }
 
-        public UsersService(IDecriptServices decriptService, IGenericRepository<UserModel> repository)
-        {
-            this.decriptService = decriptService;
-            this.repository = repository;
-        }
+    public async Task<UserModel?> GetAsync(int userId)
+    {
+        var users = await _repository.FindAsync(x => x.UserId == userId);
+        var user = users.FirstOrDefault();
+        if (user is not null)
+            user.UserPassword = await _decryptService.Decript(user.UserPassword);
 
-        public async Task<UserModel?> GetAsync(int Userid)
-        {
-            UserModel? user = await repository.GetByIdAsync(Userid);
-            if (user != null)
-            {
-                user.UserPassword = await decriptService.Decript(user.UserPassword);
-            }
-            return user;
-        }
+        return user;
+    }
 
-        public async Task<string> ResetPass(UserModel user)
-        {
-            Random rand = new Random(100000);
-            string newPass = rand.Next(10000000).ToString();
-            user.UserPassword = await decriptService.Decript(newPass);
-            repository.Update(user);
-            await repository.SaveChangesAsync();
-            return newPass;
-        }
+    public async Task<UserModel?> GetByUsernameAsync(string username, CancellationToken cancellationToken = default)
+    {
+        var users = await _repository.FindAsync(
+            x => x.UserName == username,
+            cancellationToken);
+
+        var user = users.FirstOrDefault();
+        if (user is not null)
+            user.UserPassword = await _decryptService.Decript(user.UserPassword);
+
+        return user;
+    }
+
+    public async Task<string> ResetPass(UserModel user, CancellationToken cancellationToken = default)
+    {
+        var newPassword = RandomNumberGenerator.GetInt32(1_000_000, 10_000_000).ToString();
+        user.UserPassword = await _decryptService.Encript(newPassword);
+        _repository.Update(user);
+        await _repository.SaveChangesAsync(cancellationToken);
+        return newPassword;
     }
 }
