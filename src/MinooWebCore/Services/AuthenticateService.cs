@@ -1,15 +1,29 @@
+using MinooWebCore.Infrastructure.Services.Contract;
+
 namespace MinooWebCore.Services;
 
-/// <summary>
-/// Demo-only provider. Replace with your real API or database-backed authentication.
-/// </summary>
 public sealed class AuthenticateService : IAuthenticateService
 {
-    public Task<bool> ValidateCredentialsAsync(string username, string password, CancellationToken cancellationToken = default)
+    private readonly IUsersService _usersService;
+
+    public AuthenticateService(IUsersService usersService)
     {
-        // Intentionally demo-only credentials; never use this provider in production.
-        var valid = string.Equals(username, "admin", StringComparison.OrdinalIgnoreCase)
-                    && string.Equals(password, "Minoo@123", StringComparison.Ordinal);
-        return Task.FromResult(valid);
+        _usersService = usersService;
+    }
+
+    public async Task<AuthenticatedUser?> ValidateCredentialsAsync(
+        string username,
+        string password,
+        CancellationToken cancellationToken = default)
+    {
+        var user = await _usersService.GetByUsernameAsync(username, cancellationToken);
+        if (user is null || string.IsNullOrEmpty(user.UserPassword))
+            return null;
+
+        return string.Equals(user.UserPassword, password, StringComparison.Ordinal)
+            ? new AuthenticatedUser(user.UserId, user.UserName)
+            : null;
     }
 }
+
+public sealed record AuthenticatedUser(int UserId, string UserName);
