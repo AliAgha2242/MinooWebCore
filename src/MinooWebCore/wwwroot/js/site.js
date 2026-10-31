@@ -245,6 +245,7 @@
             serverList.querySelectorAll('input[type="checkbox"]').forEach(input =>
                 input.addEventListener("change", updateSelection));
             updateSelection();
+            filterServers();
         };
 
 
