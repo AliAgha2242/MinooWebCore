@@ -23,10 +23,25 @@
             const value = button.dataset.themeValue;
             localStorage.setItem("minoo-theme", value);
             document.documentElement.dataset.theme = value;
+            document.documentElement.style.colorScheme = value === "light" ? "light" : "dark";
             if (profilePage) profilePage.dataset.theme = value;
             document.querySelectorAll("[data-theme-value]").forEach(item => item.classList.toggle("selected", item.dataset.themeValue === value));
         });
     });
+    document.documentElement.style.colorScheme = theme === "light" ? "light" : "dark";
+
+    document.querySelectorAll("[data-software-form]").forEach(form => {
+        form.addEventListener("click", event => {
+            if (event.target.closest("button, a, input, select, textarea")) return;
+            form.requestSubmit();
+        });
+        form.addEventListener("keydown", event => {
+            if (event.target !== form || (event.key !== "Enter" && event.key !== " ")) return;
+            event.preventDefault();
+            form.requestSubmit();
+        });
+    });
+
     document.querySelectorAll("[data-icon-value]").forEach(button => {
         button.classList.toggle("selected", button.dataset.iconValue === icon);
         button.addEventListener("click", () => {
@@ -129,8 +144,14 @@
             document.body.style.overflow = "";
         };
 
-        document.querySelectorAll("[data-open-mapping]").forEach(button =>
-            button.addEventListener("click", openMapping));
+        document.querySelectorAll("[data-open-mapping]").forEach(item => {
+            item.addEventListener("click", openMapping);
+            item.addEventListener("keydown", event => {
+                if (event.target !== item || (event.key !== "Enter" && event.key !== " ")) return;
+                event.preventDefault();
+                openMapping();
+            });
+        });
         mappingModal.querySelectorAll("[data-close-mapping]").forEach(button =>
             button.addEventListener("click", closeMapping));
         document.addEventListener("keydown", event => {
