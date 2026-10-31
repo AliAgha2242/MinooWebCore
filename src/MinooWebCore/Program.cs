@@ -4,6 +4,8 @@ using MinooWebCore.Infrastructure;
 using MinooWebCore.Infrastructure.Services.Contract;
 using MinooWebCore.Services;
 using MinooWebCore.Services.Wcf;
+using MinooWebCore.Persistence.StaticConfiguration;
+using StackExchange.Redis;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,6 +16,14 @@ builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepositor
 builder.Services.AddScoped<IUsersService, UsersService>();
 builder.Services.AddScoped<IAuthenticateService, AuthenticateService>();
 builder.Services.AddWcfClient();
+builder.Services.AddSingleton<IMinooConfiguration>(_ => new MinooConfiguration());
+builder.Services.AddSingleton<IConnectionMultiplexer>(_ =>
+    ConnectionMultiplexer.Connect(
+        builder.Configuration["Redis:ConnectionString"] ?? "localhost:6379,abortConnect=false"));
+builder.Services.AddAntiforgery(options =>
+{
+    options.HeaderName = "RequestVerificationToken";
+});
 
 builder.Services
     .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
