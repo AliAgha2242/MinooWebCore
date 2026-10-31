@@ -297,3 +297,13 @@ h1 { font-size: 21px; line-height: 1.4; text-align: center; margin: 0; font-weig
 .favorite-apps-empty a:hover { text-decoration:underline; }
 .favorite-software-item { text-decoration:none; }
 .favorite-software-item:hover .software-name { color:#fff; }
+
+/* Keep the logo orbit alive even when the OS requests reduced motion, but slow it down. */
+@media (prefers-reduced-motion: reduce) {
+  .orbit-one,.orbit-two {
+    animation-duration:120s !important;
+    -webkit-animation-duration:120s !important;
+    animation-iteration-count:infinite !important;
+    -webkit-animation-iteration-count:infinite !important;
+  }
+}
