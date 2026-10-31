@@ -1,6 +1,8 @@
 using Polenter.Serialization;
+using Polenter.Serialization.Advanced.Serializing;
 using System.Runtime.Serialization;
 using System.Text;
+using System.Text.RegularExpressions;
 
 
 namespace MinooWebCore.Services.Wcf.Contracts;
@@ -50,8 +52,8 @@ public sealed class ServiceRequest : ServiceConsumerInfo
     [DataMember] public bool SuppressExecption { get; set; }
 
     /// <summary>
-    /// Serializes the command arguments using SharpSerializer, matching the
-    /// XML payload format consumed by Minoo.Services.Common.XmlHelper.
+    /// Serializes command arguments using the legacy .NET Framework SharpSerializer
+    /// type names expected by the Minoo middleware.
     /// </summary>
     public string? SetArguments(params object[] arguments)
     {
@@ -76,15 +78,48 @@ internal static class SharpSerializerPayload
         if (data is null || data.Length == 0)
             return null;
 
-        using var stream = new MemoryStream();
-        var serializer = new SharpSerializer();
+        var settings = new SharpSerializerXmlSettings();
+        settings.AdvancedSettings.TypeNameConverter = new LegacyFrameworkTypeNameConverter();
 
-        // XmlHelper.Serialize serializes multiple arguments as one object[]
-        // and a single argument as that argument itself.
+        using var stream = new MemoryStream();
+        var serializer = new SharpSerializer(settings);
+
+        // The legacy service runs on .NET Framework. Its SharpSerializer expects
+        // BCL types to be identified through mscorlib, not System.Private.CoreLib.
+        // Serialize multiple arguments as one object[] exactly as XmlHelper does.
         serializer.Serialize(data.Length > 1 ? (object)data : data[0], stream);
 
         stream.Position = 0;
         using var reader = new StreamReader(stream, Encoding.UTF8);
         return reader.ReadToEnd();
+    }
+
+    private sealed class LegacyFrameworkTypeNameConverter : ITypeNameConverter
+    {
+        private static readonly Regex AssemblyMetadata =
+            new(@", (Version|Culture|PublicKeyToken)=[^,]+", RegexOptions.Compiled);
+
+        public string ConvertToTypeName(Type type)
+        {
+            var assemblyQualifiedName = type.AssemblyQualifiedName
+                ?? throw new InvalidOperationException($"Type '{type.FullName}' has no assembly-qualified name.");
+
+            var legacyName = assemblyQualifiedName.Replace(
+                "System.Private.CoreLib",
+                "mscorlib",
+                StringComparison.Ordinal);
+
+            return AssemblyMetadata.Replace(legacyName, string.Empty);
+        }
+
+        public Type ConvertToType(string typeName)
+        {
+            var runtimeName = typeName.Replace(
+                "mscorlib",
+                "System.Private.CoreLib",
+                StringComparison.Ordinal);
+
+            return Type.GetType(runtimeName, throwOnError: true)!;
+        }
     }
 }
