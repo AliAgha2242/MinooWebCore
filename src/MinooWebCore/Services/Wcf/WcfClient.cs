@@ -104,10 +104,12 @@ public sealed class WcfClient : IWcfClient
 
         return new CustomBinding(encoding, transport)
         {
-            OpenTimeout = TimeSpan.FromSeconds(30),
-            CloseTimeout = TimeSpan.FromSeconds(30),
-            SendTimeout = TimeSpan.FromMinutes(2),
-            ReceiveTimeout = TimeSpan.FromMinutes(2)
+            // TimeSpan.MaxValue disables the WCF client-side operation time limits.
+            // Calls can remain pending indefinitely if the remote service never responds.
+            OpenTimeout = TimeSpan.MaxValue,
+            CloseTimeout = TimeSpan.MaxValue,
+            SendTimeout = TimeSpan.MaxValue,
+            ReceiveTimeout = TimeSpan.MaxValue
         };
     }
 
