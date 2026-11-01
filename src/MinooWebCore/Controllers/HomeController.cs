@@ -11,15 +11,9 @@ public sealed class HomeController : Controller
 {
     private static readonly Dictionary<string, string[]> SoftwareGroups = new()
     {
-        ["گروه نرم افزاری گزارشات مبتنی بر وب"] = ["برنامه یک", "برنامه دو", "برنامه سه"],
+        ["گروه نرم افزاری گزارشات مبتنی بر وب"] = ["برنامه یک", "گزارشات شرکت قاسم ایران و زیرمجموعه‌ها", "گزارشات هلدینگ مینو و زیرمجموعه‌ها"],
         ["گروه نرم افزاری مالی"] = ["اجرا نگاشت", "برنامه دو", "برنامه سه"]
     };
-
-    private static readonly string[] ReportSubgroups =
-    [
-        "گزارشات شرکت قاسم ایران و زیرمجموعه‌ها",
-        "گزارشات هلدینگ مینو و زیرمجموعه‌ها"
-    ];
 
     private readonly IRedisService _redis;
 
@@ -28,7 +22,6 @@ public sealed class HomeController : Controller
     public async Task<IActionResult> Index()
     {
         ViewBag.SoftwareGroups = SoftwareGroups;
-        ViewBag.ReportSubgroups = ReportSubgroups;
         if (!TryGetUserId(out var userId))
             return Forbid();
 
