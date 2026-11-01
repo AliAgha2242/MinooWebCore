@@ -60,8 +60,8 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "admin",
-    pattern: "Admin/{section?}",
-    defaults: new { controller = "Admin", action = "Index" });
+    pattern: "Admin/{action=Index}/{id?}",
+    defaults: new { controller = "Admin" });
 
 app.MapControllerRoute(
     name: "default",
