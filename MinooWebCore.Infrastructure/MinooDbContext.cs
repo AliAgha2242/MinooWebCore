@@ -57,8 +57,7 @@ public sealed class MinooDbContext(DbContextOptions<MinooDbContext> options) : D
             entity.HasData(
                 new SoftwareGroup { Id = 1, Name = "مالی", IsActive = true },
                 new SoftwareGroup { Id = 2, Name = "انبار و برنامه‌ریزی", IsActive = true },
-                new SoftwareGroup { Id = 3, Name = "فروش", IsActive = true },
-                new SoftwareGroup { Id = 4, Name = "توزیع و پخش", IsActive = true });
+                new SoftwareGroup { Id = 3, Name = "فروش و توزیع و پخش", IsActive = true });
         });
 
         modelBuilder.Entity<ReportLevel>(entity =>
