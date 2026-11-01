@@ -68,3 +68,88 @@ BEGIN
 END;
 GO
 
+/* Report classification lookup tables and initial data */
+IF OBJECT_ID(N'dbo.SoftwareGroups', N'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.SoftwareGroups
+    (
+        Id       INT IDENTITY(1,1) NOT NULL CONSTRAINT PK_SoftwareGroups PRIMARY KEY,
+        Name     NVARCHAR(150) NOT NULL,
+        IsActive BIT NOT NULL CONSTRAINT DF_SoftwareGroups_IsActive DEFAULT (1)
+    );
+    CREATE UNIQUE INDEX UX_SoftwareGroups_Name ON dbo.SoftwareGroups(Name);
+END;
+GO
+
+IF OBJECT_ID(N'dbo.ReportLevels', N'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.ReportLevels
+    (
+        Id       INT IDENTITY(1,1) NOT NULL CONSTRAINT PK_ReportLevels PRIMARY KEY,
+        Name     NVARCHAR(150) NOT NULL,
+        IsActive BIT NOT NULL CONSTRAINT DF_ReportLevels_IsActive DEFAULT (1)
+    );
+    CREATE UNIQUE INDEX UX_ReportLevels_Name ON dbo.ReportLevels(Name);
+END;
+GO
+
+IF NOT EXISTS (SELECT 1 FROM dbo.SoftwareGroups WHERE Id = 1)
+BEGIN
+    SET IDENTITY_INSERT dbo.SoftwareGroups ON;
+    INSERT INTO dbo.SoftwareGroups (Id, Name, IsActive) VALUES
+        (1, N'مالی', 1),
+        (2, N'انبار و برنامه‌ریزی', 1),
+        (3, N'فروش', 1),
+        (4, N'توزیع و پخش', 1);
+    SET IDENTITY_INSERT dbo.SoftwareGroups OFF;
+END;
+GO
+
+IF NOT EXISTS (SELECT 1 FROM dbo.ReportLevels WHERE Id = 1)
+BEGIN
+    SET IDENTITY_INSERT dbo.ReportLevels ON;
+    INSERT INTO dbo.ReportLevels (Id, Name, IsActive) VALUES
+        (1, N'هلدینگ مینو', 1),
+        (2, N'شرکت قاسم ایران', 1);
+    SET IDENTITY_INSERT dbo.ReportLevels OFF;
+END;
+GO
+
+/* Add metadata to existing report definitions; legacy reports default to Finance / Holding Minoo. */
+IF COL_LENGTH(N'dbo.ReportDefinitions', N'SoftwareGroupId') IS NULL
+    ALTER TABLE dbo.ReportDefinitions ADD SoftwareGroupId INT NULL;
+GO
+IF COL_LENGTH(N'dbo.ReportDefinitions', N'ReportLevelId') IS NULL
+    ALTER TABLE dbo.ReportDefinitions ADD ReportLevelId INT NULL;
+GO
+IF COL_LENGTH(N'dbo.ReportDefinitions', N'SpecificServerVahedeTejariSN') IS NULL
+    ALTER TABLE dbo.ReportDefinitions ADD SpecificServerVahedeTejariSN DECIMAL(18,3) NULL;
+GO
+
+UPDATE dbo.ReportDefinitions
+SET SoftwareGroupId = 1
+WHERE SoftwareGroupId IS NULL;
+UPDATE dbo.ReportDefinitions
+SET ReportLevelId = 1
+WHERE ReportLevelId IS NULL;
+GO
+
+IF EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID(N'dbo.ReportDefinitions') AND name = N'SoftwareGroupId' AND is_nullable = 1)
+    ALTER TABLE dbo.ReportDefinitions ALTER COLUMN SoftwareGroupId INT NOT NULL;
+GO
+IF EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID(N'dbo.ReportDefinitions') AND name = N'ReportLevelId' AND is_nullable = 1)
+    ALTER TABLE dbo.ReportDefinitions ALTER COLUMN ReportLevelId INT NOT NULL;
+GO
+
+IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = N'FK_ReportDefinitions_SoftwareGroups')
+    ALTER TABLE dbo.ReportDefinitions ADD CONSTRAINT FK_ReportDefinitions_SoftwareGroups
+        FOREIGN KEY (SoftwareGroupId) REFERENCES dbo.SoftwareGroups(Id);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = N'FK_ReportDefinitions_ReportLevels')
+    ALTER TABLE dbo.ReportDefinitions ADD CONSTRAINT FK_ReportDefinitions_ReportLevels
+        FOREIGN KEY (ReportLevelId) REFERENCES dbo.ReportLevels(Id);
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_ReportDefinitions_SoftwareGroupId_ReportLevelId' AND object_id = OBJECT_ID(N'dbo.ReportDefinitions'))
+    CREATE INDEX IX_ReportDefinitions_SoftwareGroupId_ReportLevelId
+        ON dbo.ReportDefinitions(SoftwareGroupId, ReportLevelId);
+GO
