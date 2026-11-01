@@ -10,6 +10,11 @@ public sealed class ReportDefinition
     public byte[]? ExcelContent { get; set; }
     public bool NeedsPagination { get; set; }
     public int? PageSize { get; set; }
+    public int SoftwareGroupId { get; set; }
+    public int ReportLevelId { get; set; }
+    public decimal? SpecificServerVahedeTejariSN { get; set; }
+    public SoftwareGroup SoftwareGroup { get; set; } = null!;
+    public ReportLevel ReportLevel { get; set; } = null!;
     public bool IsDeleted { get; set; }
     public DateTime CreatedAtUtc { get; set; }
     public DateTime? UpdatedAtUtc { get; set; }
