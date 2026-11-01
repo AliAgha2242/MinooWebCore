@@ -172,7 +172,9 @@
             function updateParameterType(row) {
                 const type = row.querySelector('.parameter-type').value;
                 row.querySelectorAll('[data-for-type]').forEach(element => {
-                    element.hidden = !element.dataset.forType.split(' ').includes(type);
+                    const visible = element.dataset.forType.split(' ').includes(type);
+                    element.hidden = !visible;
+                    element.querySelectorAll('input, textarea').forEach(field => field.required = visible);
                 });
             }
 
