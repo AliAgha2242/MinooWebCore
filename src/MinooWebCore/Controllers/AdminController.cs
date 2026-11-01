@@ -57,7 +57,7 @@ public sealed class AdminController : Controller
                 if (validationError is not null)
                     ModelState.AddModelError(nameof(input.ExcelFile), validationError);
                 else
-                    ViewBag.SuccessMessage = "ساختار فایل اکسل معتبر است و می‌توانید به مرحله ثبت گزارش بروید.";
+                    ViewBag.SuccessMessage = "فایل اکسل از نظر تعداد شیت و عنوان ستون‌ها معتبر است. در این مرحله هنوز ذخیره‌سازی گزارش انجام نمی‌شود.";
             }
             catch (InvalidDataException)
             {
