@@ -28,6 +28,7 @@ public sealed class HomeController : Controller
     public async Task<IActionResult> Index()
     {
         ViewBag.SoftwareGroups = SoftwareGroups;
+        ViewBag.ReportSubgroups = ReportSubgroups;
         if (!TryGetUserId(out var userId))
             return Forbid();
 
