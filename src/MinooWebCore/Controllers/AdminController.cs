@@ -93,8 +93,8 @@ public sealed class AdminController : Controller
             CreatedAtUtc = DateTime.UtcNow
         };
 
+        AddParameterEntities(report, input.Parameters);
         await _reportRepository.AddAsync(report, cancellationToken);
-        AddParameterEntities(report.Id, input.Parameters);
         try
         {
             await _reportRepository.SaveChangesAsync(cancellationToken);
@@ -187,7 +187,7 @@ public sealed class AdminController : Controller
         foreach (var parameter in oldParameters)
             _parameterRepository.Remove(parameter);
 
-        AddParameterEntities(report.Id, input.Parameters);
+        AddParameterEntities(report, input.Parameters);
         _reportRepository.Update(report);
 
         try
@@ -300,14 +300,13 @@ public sealed class AdminController : Controller
         return ModelState.IsValid;
     }
 
-    private async void AddParameterEntities(int reportId, IReadOnlyList<ReportParameterInput> parameters)
+    private static void AddParameterEntities(ReportDefinition report, IReadOnlyList<ReportParameterInput> parameters)
     {
         for (var index = 0; index < parameters.Count; index++)
         {
             var item = parameters[index];
-            await _parameterRepository.AddAsync(new ReportParameterDefinition
+            report.Parameters.Add(new ReportParameterDefinition
             {
-                ReportDefinitionId = reportId,
                 Name = item.Name.Trim(),
                 DisplayName = item.DisplayName.Trim(),
                 Type = item.Type,
