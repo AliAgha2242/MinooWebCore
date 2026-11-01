@@ -1,10 +1,12 @@
 @model MinooWebCore.Controllers.AdminController.CreateReportInput
+@using System.Text.Json
 @{
     ViewData["Title"] = "ایجاد گزارش";
     var menuItems = ViewBag.MenuItems as (string Key, string Title, string Description, string Icon)[] ?? [];
     var selectedSection = ViewBag.SelectedSection as string ?? "create-report";
     var selectedTitle = ViewBag.SelectedTitle as string ?? "ایجاد گزارش";
     var selectedDescription = ViewBag.SelectedDescription as string ?? "";
+    var savedParameters = JsonSerializer.Serialize(Model.Parameters);
 }
 <main class="admin-page">
     <aside class="admin-sidebar">
@@ -51,9 +53,9 @@
         <section class="report-builder">
             <div class="report-builder-heading">
                 <div>
-                    <span class="report-step">مرحله ۱ · مشخصات اولیه</span>
+                    <span class="report-step">مرحله ۱ · مشخصات و منبع</span>
                     <h3>تعریف گزارش جدید</h3>
-                    <p>نام گزارش و منبع داده‌ای که قرار است گزارش از آن ساخته شود را مشخص کنید.</p>
+                    <p>نام گزارش و منبع داده را مشخص کنید؛ سپس پارامترهای ورودی گزارش را تعریف کنید.</p>
                 </div>
                 <span class="report-builder-icon">▤</span>
             </div>
@@ -62,13 +64,9 @@
             {
                 <div class="report-message report-message-success" role="status"><span>✓</span>@successMessage</div>
             }
-            @if (ViewBag.InfoMessage is string infoMessage)
-            {
-                <div class="report-message report-message-info" role="status"><span>i</span>@infoMessage</div>
-            }
-            <div asp-validation-summary="ModelOnly" class="report-validation-summary"></div>
+            <div asp-validation-summary="All" class="report-validation-summary"></div>
 
-            <form asp-controller="Admin" asp-action="CreateReport" method="post" enctype="multipart/form-data" class="report-form">
+            <form asp-controller="Admin" asp-action="CreateReport" method="post" enctype="multipart/form-data" class="report-form" id="reportForm">
                 <div class="report-field">
                     <label asp-for="ReportName">نام گزارش</label>
                     <input asp-for="ReportName" type="text" placeholder="مثلاً گزارش فروش ماهانه" autocomplete="off" required />
@@ -96,11 +94,40 @@
                     </div>
                 </div>
 
-                <label class="report-checkbox">
-                    <input asp-for="NeedsPagination" type="checkbox" />
-                    <span class="report-checkbox-mark"></span>
-                    <span class="report-checkbox-copy"><strong>این گزارش به صفحه‌بندی نیاز دارد</strong><small>در صورت فعال بودن، نتایج گزارش به‌صورت صفحه‌ای نمایش داده می‌شوند.</small></span>
-                </label>
+                <div id="sqlOptions" class="report-source-panel" hidden>
+                    <div class="report-field">
+                        <label asp-for="SqlQuery">Query گزارش</label>
+                        <textarea asp-for="SqlQuery" id="sqlQuery" rows="7" dir="ltr" spellcheck="false" placeholder="SELECT ... FROM ..."></textarea>
+                        <span asp-validation-for="SqlQuery" class="report-field-error"></span>
+                        <span class="report-field-help">فعلاً Query فقط دریافت و اعتبارسنجی اولیه می‌شود و اجرا نخواهد شد.</span>
+                    </div>
+                </div>
+
+                <div class="report-pagination">
+                    <label class="report-checkbox">
+                        <input asp-for="NeedsPagination" id="needsPagination" type="checkbox" />
+                        <span class="report-checkbox-mark"></span>
+                        <span class="report-checkbox-copy"><strong>این گزارش به صفحه‌بندی نیاز دارد</strong><small>تعداد رکوردهای قابل نمایش در هر صفحه را تعیین کنید.</small></span>
+                    </label>
+                    <div class="report-field report-page-size" id="pageSizeField" hidden>
+                        <label asp-for="PageSize">تعداد رکورد در هر صفحه</label>
+                        <input asp-for="PageSize" type="number" min="1" step="1" placeholder="مثلاً ۲۰" />
+                        <span asp-validation-for="PageSize" class="report-field-error"></span>
+                    </div>
+                </div>
+
+                <div class="report-parameters">
+                    <div class="report-parameters-heading">
+                        <div>
+                            <span class="report-step">مرحله ۲ · پارامترهای ورودی</span>
+                            <h3>تعریف پارامترهای گزارش</h3>
+                            <p>مشخص کنید کاربر هنگام مشاهده گزارش چه مقادیری را وارد یا انتخاب کند.</p>
+                        </div>
+                        <button type="button" class="report-add-parameter" id="addParameter">＋ افزودن پارامتر</button>
+                    </div>
+                    <div id="parameterList" class="report-parameter-list"></div>
+                    <div id="emptyParameters" class="report-empty-parameters">هنوز پارامتری تعریف نشده است. در صورت نیاز، «افزودن پارامتر» را انتخاب کنید.</div>
+                </div>
 
                 <div class="report-form-actions">
                     <button type="submit" class="report-submit-button"><span>✓</span> بررسی مشخصات گزارش</button>
@@ -118,16 +145,119 @@
             const source = document.getElementById('reportSource');
             const excelOptions = document.getElementById('excelOptions');
             const excelFile = document.getElementById('excelFile');
+            const sqlOptions = document.getElementById('sqlOptions');
+            const sqlQuery = document.getElementById('sqlQuery');
+            const pagination = document.getElementById('needsPagination');
+            const pageSizeField = document.getElementById('pageSizeField');
+            const pageSizeInput = pageSizeField.querySelector('input');
+            const parameterList = document.getElementById('parameterList');
+            const emptyParameters = document.getElementById('emptyParameters');
+            let parameterIndex = 0;
 
             function updateSourceFields() {
                 const isExcel = source.value === 'Excel';
                 excelOptions.hidden = !isExcel;
+                sqlOptions.hidden = isExcel;
                 excelFile.required = isExcel;
+                sqlQuery.required = !isExcel;
                 if (!isExcel) excelFile.value = '';
             }
 
+            function updatePagination() {
+                pageSizeField.hidden = !pagination.checked;
+                pageSizeInput.required = pagination.checked;
+                if (!pagination.checked) pageSizeInput.value = '';
+            }
+
+            function updateParameterType(row) {
+                const type = row.querySelector('.parameter-type').value;
+                row.querySelectorAll('[data-for-type]').forEach(element => {
+                    element.hidden = !element.dataset.forType.split(' ').includes(type);
+                });
+            }
+
+            function addParameter(parameter = {}) {
+                const index = parameterIndex++;
+                const row = document.createElement('div');
+                row.className = 'report-parameter-card';
+                row.innerHTML = `
+                    <div class="report-parameter-card-head">
+                        <strong>پارامتر <span class="parameter-number">${index + 1}</span></strong>
+                        <button type="button" class="report-remove-parameter" aria-label="حذف پارامتر">حذف ×</button>
+                    </div>
+                    <div class="report-parameter-grid">
+                        <div class="report-field">
+                            <label>نام فنی پارامتر</label>
+                            <input name="Parameters[${index}].Name" type="text" dir="ltr" placeholder="FromDate" required />
+                        </div>
+                        <div class="report-field">
+                            <label>عنوان نمایشی</label>
+                            <input name="Parameters[${index}].DisplayName" type="text" placeholder="از تاریخ" required />
+                        </div>
+                        <div class="report-field">
+                            <label>نوع کنترل</label>
+                            <select name="Parameters[${index}].Type" class="parameter-type">
+                                <option value="Text">متن</option>
+                                <option value="Number">عدد</option>
+                                <option value="Date">تاریخ (ورودی متنی)</option>
+                                <option value="Checkbox">چک‌باکس</option>
+                                <option value="RadioButton">رادیوباتن</option>
+                                <option value="ListBox">لیست‌باکس</option>
+                            </select>
+                        </div>
+                        <div class="report-field parameter-extra" data-for-type="RadioButton">
+                            <label>گزینه‌های رادیوباتن</label>
+                            <textarea name="Parameters[${index}].Options" rows="3" placeholder="هر گزینه در یک خط"></textarea>
+                        </div>
+                        <div class="report-field parameter-extra parameter-list-source" data-for-type="ListBox">
+                            <label>Query منبع گزینه‌های لیست‌باکس</label>
+                            <textarea name="Parameters[${index}].DataSource" rows="4" dir="ltr" spellcheck="false" placeholder="SELECT Id, Title FROM ..."></textarea>
+                        </div>
+                        <div class="report-field parameter-extra" data-for-type="ListBox">
+                            <label>نام ستون نمایشی (DisplayName)</label>
+                            <input name="Parameters[${index}].DisplayNameField" type="text" dir="ltr" placeholder="Title" />
+                        </div>
+                        <div class="report-field parameter-extra" data-for-type="ListBox">
+                            <label>نام ستون مقدار (ValueName)</label>
+                            <input name="Parameters[${index}].ValueField" type="text" dir="ltr" placeholder="Id" />
+                        </div>
+                    </div>`;
+                row.querySelector(`[name="Parameters[${index}].Name"]`).value = parameter.name || '';
+                row.querySelector(`[name="Parameters[${index}].DisplayName"]`).value = parameter.displayName || '';
+                row.querySelector(`[name="Parameters[${index}].Type"]`).value = parameter.type || 'Text';
+                row.querySelector(`[name="Parameters[${index}].DataSource"]`).value = parameter.dataSource || '';
+                row.querySelector(`[name="Parameters[${index}].DisplayNameField"]`).value = parameter.displayNameField || '';
+                row.querySelector(`[name="Parameters[${index}].ValueField"]`).value = parameter.valueField || '';
+                row.querySelector(`[name="Parameters[${index}].Options"]`).value = parameter.options || '';
+                row.querySelector('.parameter-type').addEventListener('change', () => updateParameterType(row));
+                row.querySelector('.report-remove-parameter').addEventListener('click', () => {
+                    row.remove();
+                    refreshParameterNumbers();
+                });
+                parameterList.appendChild(row);
+                updateParameterType(row);
+                refreshParameterNumbers();
+            }
+
+            function refreshParameterNumbers() {
+                const rows = [...parameterList.querySelectorAll('.report-parameter-card')];
+                rows.forEach((row, index) => row.querySelector('.parameter-number').textContent = index + 1);
+                emptyParameters.hidden = rows.length > 0;
+            }
+
+            document.getElementById('addParameter').addEventListener('click', () => addParameter());
             source.addEventListener('change', updateSourceFields);
+            pagination.addEventListener('change', updatePagination);
             updateSourceFields();
+            updatePagination();
+
+            const existingParameters = @Html.Raw(savedParameters);
+            existingParameters.forEach(parameter => addParameter({
+                name: parameter.Name, displayName: parameter.DisplayName, type: parameter.Type,
+                dataSource: parameter.DataSource, displayNameField: parameter.DisplayNameField,
+                valueField: parameter.ValueField, options: parameter.Options
+            }));
+            refreshParameterNumbers();
         })();
     </script>
 }
