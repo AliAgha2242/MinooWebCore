@@ -53,6 +53,9 @@ public sealed class MinooDbContext(DbContextOptions<MinooDbContext> options) : D
             entity.Property(x => x.ValueField).HasMaxLength(128);
             entity.HasIndex(x => new { x.ReportDefinitionId, x.SortOrder })
                 .HasDatabaseName("IX_ReportParameters_ReportDefinitionId");
+            entity.HasIndex(x => new { x.ReportDefinitionId, x.Name })
+                .IsUnique()
+                .HasDatabaseName("UX_ReportParameters_ReportDefinitionId_Name");
         });
     }
 }
