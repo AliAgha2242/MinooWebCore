@@ -207,3 +207,16 @@
 .report-form-actions { position: sticky; bottom: 0; z-index: 2; margin: 0 -4px; padding: 14px 4px 4px; background: linear-gradient(180deg, transparent, rgba(8,25,42,.96) 22%); }
 .report-submit-button { min-width: 170px; }
 @media (max-width: 700px) { .report-basic-grid { grid-template-columns: 1fr; } .report-form-section { padding: 16px 13px; } .report-section-heading { gap: 9px; } .report-form-actions { position: static; } }
+
+
+/* Report classification and server targeting */
+.report-metadata-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 18px; }
+.report-server-option { display: grid; gap: 13px; padding: 17px 18px; border: 1px solid rgba(105,178,208,.15); border-radius: 12px; background: rgba(4,19,33,.32); }
+.report-server-select { max-width: 560px; padding-right: 30px; }
+.report-server-select[hidden] { display: none !important; }
+.report-server-hint { display: flex; align-items: flex-start; gap: 8px; margin: 0; color: #81a4ba; font-size: 10px; line-height: 1.9; }
+.report-server-hint span { color: #77d5d9; font-size: 13px; }
+@media (max-width: 700px) {
+  .report-metadata-grid { grid-template-columns: 1fr; }
+  .report-server-select { max-width: none; padding-right: 0; }
+}
