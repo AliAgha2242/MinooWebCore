@@ -1,0 +1,19 @@
+namespace MinooWebCore.Data.Models;
+
+public sealed class ReportDefinition
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string SourceType { get; set; } = string.Empty;
+    public string? SqlQuery { get; set; }
+    public string? ExcelFileName { get; set; }
+    public byte[]? ExcelContent { get; set; }
+    public bool NeedsPagination { get; set; }
+    public int? PageSize { get; set; }
+    public bool IsDeleted { get; set; }
+    public DateTime CreatedAtUtc { get; set; }
+    public DateTime? UpdatedAtUtc { get; set; }
+    public DateTime? DeletedAtUtc { get; set; }
+
+    public ICollection<ReportParameterDefinition> Parameters { get; set; } = new List<ReportParameterDefinition>();
+}
