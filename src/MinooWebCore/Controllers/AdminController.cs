@@ -280,7 +280,7 @@ public sealed class AdminController : Controller
         if (input.Parameters.Count > 30)
             ModelState.AddModelError(nameof(input.Parameters), "حداکثر ۳۰ پارامتر برای هر گزارش مجاز است.");
 
-        var allowedParameterTypes = new HashSet<string>(["Text", "Number", "Date", "Checkbox", "RadioButton", "ListBox"], StringComparer.Ordinal);
+        var allowedParameterTypes = new HashSet<string>(new[] { "Text", "Number", "Date", "Checkbox", "RadioButton", "ListBox" }, StringComparer.Ordinal);
         var parameterNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         for (var index = 0; index < input.Parameters.Count; index++)
         {
