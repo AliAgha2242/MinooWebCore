@@ -41,23 +41,50 @@ public sealed class AdminController : Controller
         if (input.Source is not ("Excel" or "Sql"))
             ModelState.AddModelError(nameof(input.Source), "منبع گزارش را انتخاب کنید.");
 
-        if (input.Source == "Sql")
-            return View("Index", input);
+        if (input.NeedsPagination && (!input.PageSize.HasValue || input.PageSize.Value <= 0))
+            ModelState.AddModelError(nameof(input.PageSize), "تعداد رکورد در هر صفحه باید عددی بزرگ‌تر از صفر باشد.");
 
-        if (input.ExcelFile is null || input.ExcelFile.Length == 0)
-            ModelState.AddModelError(nameof(input.ExcelFile), "فایل اکسل را انتخاب کنید.");
-        else if (!Path.GetExtension(input.ExcelFile.FileName).Equals(".xlsx", StringComparison.OrdinalIgnoreCase))
-            ModelState.AddModelError(nameof(input.ExcelFile), "فعلاً فقط فایل‌های Excel با پسوند .xlsx پشتیبانی می‌شوند.");
+        if (input.Source == "Sql" && string.IsNullOrWhiteSpace(input.SqlQuery))
+            ModelState.AddModelError(nameof(input.SqlQuery), "Query گزارش را وارد کنید.");
 
-        if (ModelState.IsValid)
+        if (input.Source == "Excel")
+        {
+            if (input.ExcelFile is null || input.ExcelFile.Length == 0)
+                ModelState.AddModelError(nameof(input.ExcelFile), "فایل اکسل را انتخاب کنید.");
+            else if (!Path.GetExtension(input.ExcelFile.FileName).Equals(".xlsx", StringComparison.OrdinalIgnoreCase))
+                ModelState.AddModelError(nameof(input.ExcelFile), "فعلاً فقط فایل‌های Excel با پسوند .xlsx پشتیبانی می‌شوند.");
+        }
+
+        var allowedParameterTypes = new[] { "Text", "Number", "Date", "Checkbox", "RadioButton", "ListBox" };
+        for (var index = 0; index < input.Parameters.Count; index++)
+        {
+            var parameter = input.Parameters[index];
+            if (string.IsNullOrWhiteSpace(parameter.Name))
+                ModelState.AddModelError($"Parameters[{index}].Name", "نام فنی پارامتر الزامی است.");
+            if (string.IsNullOrWhiteSpace(parameter.DisplayName))
+                ModelState.AddModelError($"Parameters[{index}].DisplayName", "عنوان پارامتر الزامی است.");
+            if (!allowedParameterTypes.Contains(parameter.Type))
+                ModelState.AddModelError($"Parameters[{index}].Type", "نوع پارامتر معتبر نیست.");
+            if (parameter.Type == "ListBox")
+            {
+                if (string.IsNullOrWhiteSpace(parameter.DataSource))
+                    ModelState.AddModelError($"Parameters[{index}].DataSource", "Query منبع لیست‌باکس الزامی است.");
+                if (string.IsNullOrWhiteSpace(parameter.DisplayNameField))
+                    ModelState.AddModelError($"Parameters[{index}].DisplayNameField", "نام ستون نمایشی الزامی است.");
+                if (string.IsNullOrWhiteSpace(parameter.ValueField))
+                    ModelState.AddModelError($"Parameters[{index}].ValueField", "نام ستون مقدار الزامی است.");
+            }
+            if (parameter.Type == "RadioButton" && string.IsNullOrWhiteSpace(parameter.Options))
+                ModelState.AddModelError($"Parameters[{index}].Options", "گزینه‌های رادیوباتن را وارد کنید.");
+        }
+
+        if (ModelState.IsValid && input.Source == "Excel")
         {
             try
             {
                 var validationError = ValidateExcelFile(input.ExcelFile!);
                 if (validationError is not null)
                     ModelState.AddModelError(nameof(input.ExcelFile), validationError);
-                else
-                    ViewBag.SuccessMessage = "فایل اکسل از نظر تعداد شیت و عنوان ستون‌ها معتبر است. در این مرحله هنوز ذخیره‌سازی گزارش انجام نمی‌شود.";
             }
             catch (InvalidDataException)
             {
@@ -68,6 +95,9 @@ public sealed class AdminController : Controller
                 ModelState.AddModelError(nameof(input.ExcelFile), "هنگام بررسی فایل اکسل خطایی رخ داد.");
             }
         }
+
+        if (ModelState.IsValid)
+            ViewBag.SuccessMessage = "ساختار منبع و پارامترهای گزارش معتبر است. در این مرحله هنوز اجرای Query و ذخیره‌سازی گزارش انجام نمی‌شود.";
 
         return View("Index", input);
     }
@@ -239,6 +269,21 @@ public sealed class AdminController : Controller
         public string ReportName { get; set; } = string.Empty;
         public string Source { get; set; } = "Excel";
         public bool NeedsPagination { get; set; }
+        public int? PageSize { get; set; }
         public IFormFile? ExcelFile { get; set; }
+        public string SqlQuery { get; set; } = string.Empty;
+        public List<ReportParameterInput> Parameters { get; set; } = [];
+
+    }
+
+    public sealed class ReportParameterInput
+    {
+        public string Name { get; set; } = string.Empty;
+        public string DisplayName { get; set; } = string.Empty;
+        public string Type { get; set; } = "Text";
+        public string DataSource { get; set; } = string.Empty;
+        public string DisplayNameField { get; set; } = string.Empty;
+        public string ValueField { get; set; } = string.Empty;
+        public string Options { get; set; } = string.Empty;
     }
 }
