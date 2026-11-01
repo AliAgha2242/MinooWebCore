@@ -67,3 +67,10 @@ BEGIN
         ON dbo.ReportParameters(ReportDefinitionId, SortOrder);
 END;
 GO
+
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'UX_ReportParameters_ReportDefinitionId_Name' AND object_id = OBJECT_ID(N'dbo.ReportParameters'))
+BEGIN
+    CREATE UNIQUE INDEX UX_ReportParameters_ReportDefinitionId_Name
+        ON dbo.ReportParameters(ReportDefinitionId, Name);
+END;
+GO
