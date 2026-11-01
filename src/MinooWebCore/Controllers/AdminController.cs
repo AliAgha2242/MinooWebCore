@@ -122,11 +122,12 @@ public sealed class AdminController : Controller
         using (var worksheetStream = worksheetEntry.Open())
             worksheet = XDocument.Load(worksheetStream);
 
-        var firstRow = worksheet.Root?
+        var rows = worksheet.Root?
             .Element(main + "sheetData")?
             .Elements(main + "row")
-            .FirstOrDefault();
+            .ToList() ?? [];
 
+        var firstRow = rows.FirstOrDefault();
         if (firstRow is null)
             return "شیت اکسل خالی است و ردیف عنوان ستون‌ها وجود ندارد.";
 
@@ -154,7 +155,15 @@ public sealed class AdminController : Controller
             headers[columnIndex] = value.Trim();
         }
 
-        var lastColumn = headers.Keys.DefaultIfEmpty(0).Max();
+        var lastColumn = rows
+            .SelectMany(row => row.Elements(main + "c"))
+            .Where(cell => cell.Element(main + "v") is not null
+                || cell.Element(main + "is") is not null
+                || cell.Element(main + "f") is not null)
+            .Select(cell => GetColumnIndex((string?)cell.Attribute("r")))
+            .DefaultIfEmpty(0)
+            .Max();
+
         if (lastColumn == 0)
             return "ردیف اول اکسل باید شامل عنوان ستون‌ها باشد.";
 
