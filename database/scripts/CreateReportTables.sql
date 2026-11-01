@@ -99,8 +99,7 @@ SELECT seed.Id, seed.Name, 1
 FROM (VALUES
     (1, N'مالی'),
     (2, N'انبار و برنامه‌ریزی'),
-    (3, N'فروش'),
-    (4, N'توزیع و پخش')
+    (3, N'فروش و توزیع و پخش')
 ) AS seed(Id, Name)
 WHERE NOT EXISTS (SELECT 1 FROM dbo.SoftwareGroups existing WHERE existing.Id = seed.Id);
 SET IDENTITY_INSERT dbo.SoftwareGroups OFF;
