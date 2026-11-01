@@ -1,8 +1,9 @@
+@model MinooWebCore.Controllers.AdminController.CreateReportInput
 @{
-    ViewData["Title"] = "پنل مدیریت";
+    ViewData["Title"] = "ایجاد گزارش";
     var menuItems = ViewBag.MenuItems as (string Key, string Title, string Description, string Icon)[] ?? [];
-    var selectedSection = ViewBag.SelectedSection as string ?? "dashboard";
-    var selectedTitle = ViewBag.SelectedTitle as string ?? "نمای کلی";
+    var selectedSection = ViewBag.SelectedSection as string ?? "create-report";
+    var selectedTitle = ViewBag.SelectedTitle as string ?? "ایجاد گزارش";
     var selectedDescription = ViewBag.SelectedDescription as string ?? "";
 }
 <main class="admin-page">
@@ -47,24 +48,97 @@
             <span class="admin-welcome-symbol">M<span>•</span></span>
         </div>
 
-        @if (selectedSection == "dashboard")
-        {
-            <div class="admin-stat-grid">
-                <article class="admin-stat-card"><span class="admin-stat-icon">♙</span><span class="admin-stat-label">کاربران</span><strong>—</strong><small>هنوز به پایگاه داده متصل نشده</small></article>
-                <article class="admin-stat-card"><span class="admin-stat-icon">▤</span><span class="admin-stat-label">نرم‌افزارها</span><strong>—</strong><small>آمار پس از پیاده‌سازی مدیریت نمایش داده می‌شود</small></article>
-                <article class="admin-stat-card"><span class="admin-stat-icon">⚿</span><span class="admin-stat-label">نقش‌ها و دسترسی‌ها</span><strong>—</strong><small>در انتظار تعریف ساختار دسترسی</small></article>
+        <section class="report-builder">
+            <div class="report-builder-heading">
+                <div>
+                    <span class="report-step">مرحله ۱ · مشخصات اولیه</span>
+                    <h3>تعریف گزارش جدید</h3>
+                    <p>نام گزارش و منبع داده‌ای که قرار است گزارش از آن ساخته شود را مشخص کنید.</p>
+                </div>
+                <span class="report-builder-icon">▤</span>
             </div>
-        }
-        else
-        {
-            <section class="admin-placeholder">
-                <span class="admin-placeholder-icon">◈</span>
-                <h3>این بخش آماده توسعه است</h3>
-                <p>صفحه «@selectedTitle» فعلاً به‌صورت جایگاه اولیه ایجاد شده است. منطق و عملیات این قسمت در مرحله بعد اضافه خواهد شد.</p>
-            </section>
-        }
 
-        <div class="admin-notice"><span>i</span><p>این پنل فعلاً ساختار ظاهری و منوهای اولیه را دارد؛ عملیات مدیریتی هنوز پیاده‌سازی نشده است.</p></div>
+            @if (ViewBag.SuccessMessage is string successMessage)
+            {
+                <div class="report-message report-message-success" role="status"><span>✓</span>@successMessage</div>
+            }
+            @if (ViewBag.InfoMessage is string infoMessage)
+            {
+                <div class="report-message report-message-info" role="status"><span>i</span>@infoMessage</div>
+            }
+            <div asp-validation-summary="ModelOnly" class="report-validation-summary"></div>
+
+            <form asp-controller="Admin" asp-action="CreateReport" method="post" enctype="multipart/form-data" class="report-form">
+                <div class="report-field">
+                    <label asp-for="ReportName">نام گزارش</label>
+                    <input asp-for="ReportName" type="text" placeholder="مثلاً گزارش فروش ماهانه" autocomplete="off" />
+                    <span asp-validation-for="ReportName" class="report-field-error"></span>
+                </div>
+
+                <div class="report-field">
+                    <label asp-for="Source">منبع گزارش</label>
+                    <select asp-for="Source" id="reportSource">
+                        <option value="Excel">فایل Excel</option>
+                        <option value="Sql">پایگاه داده SQL</option>
+                    </select>
+                    <span asp-validation-for="Source" class="report-field-error"></span>
+                </div>
+
+                <div id="excelOptions" class="report-source-panel">
+                    <div class="report-field">
+                        <label asp-for="ExcelFile">فایل اکسل گزارش</label>
+                        <div class="report-file-control">
+                            <input asp-for="ExcelFile" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" id="excelFile" />
+                            <span class="report-file-hint">فرمت مجاز: .xlsx · حداکثر حجم: ۲۰ مگابایت</span>
+                        </div>
+                        <span asp-validation-for="ExcelFile" class="report-field-error"></span>
+                        <span class="report-field-help">فایل باید دقیقاً یک شیت داشته باشد و تمام ستون‌ها در ردیف اول دارای عنوان باشند.</span>
+                    </div>
+                </div>
+
+                <div id="sqlOptions" class="report-source-panel report-sql-placeholder" hidden>
+                    <span class="report-sql-icon">◈</span>
+                    <div>
+                        <strong>تنظیمات SQL</strong>
+                        <p>این بخش در مرحله بعد و پس از مشخص شدن جزئیات اتصال و کوئری تکمیل می‌شود.</p>
+                    </div>
+                </div>
+
+                <label class="report-checkbox">
+                    <input asp-for="NeedsPagination" type="checkbox" />
+                    <span class="report-checkbox-mark"></span>
+                    <span class="report-checkbox-copy"><strong>این گزارش به صفحه‌بندی نیاز دارد</strong><small>در صورت فعال بودن، نتایج گزارش به‌صورت صفحه‌ای نمایش داده می‌شوند.</small></span>
+                </label>
+
+                <div class="report-form-actions">
+                    <button type="submit" class="report-submit-button"><span>✓</span> بررسی و آماده‌سازی گزارش</button>
+                </div>
+            </form>
+        </section>
+
         <footer class="admin-footer"><span>© @DateTime.Now.Year گروه صنعتی مینو</span><span>MINOO WEB CORE · ADMIN</span></footer>
     </section>
 </main>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (() => {
+            const source = document.getElementById('reportSource');
+            const excelOptions = document.getElementById('excelOptions');
+            const sqlOptions = document.getElementById('sqlOptions');
+            const excelFile = document.getElementById('excelFile');
+
+            function updateSourceFields() {
+                const isExcel = source.value === 'Excel';
+                excelOptions.hidden = !isExcel;
+                sqlOptions.hidden = isExcel;
+                excelFile.required = isExcel;
+                if (!isExcel) excelFile.value = '';
+            }
+
+            source.addEventListener('change', updateSourceFields);
+            updateSourceFields();
+        })();
+    </script>
+}
