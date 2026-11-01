@@ -120,3 +120,38 @@
   .report-form-actions, .report-submit-button { width: 100%; }
   .report-sql-placeholder { align-items: flex-start; }
 }
+
+
+/* SQL source, pagination and dynamic report parameters */
+.report-field textarea { width: 100%; min-height: 110px; padding: 12px 13px; resize: vertical; border: 1px solid rgba(158,196,222,.2); border-radius: 10px; outline: none; background: rgba(4,17,30,.72); color: #e5f3fb; font: 12px/1.8 Consolas, monospace; }
+.report-field textarea:focus { border-color: rgba(105,224,223,.65); box-shadow: 0 0 0 3px rgba(69,190,202,.09); }
+.report-field textarea::placeholder { color: #607d95; }
+.report-pagination { display: grid; gap: 15px; padding: 15px; border: 1px solid rgba(105,178,208,.14); border-radius: 12px; background: rgba(4,19,33,.28); }
+.report-page-size { max-width: 260px; }
+.report-page-size[hidden] { display: none; }
+.report-parameters { display: grid; gap: 15px; padding-top: 20px; border-top: 1px solid rgba(171,204,229,.1); }
+.report-parameters-heading { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+.report-parameters-heading h3 { margin: 7px 0 4px; color: #eaf7ff; font-size: 16px; }
+.report-parameters-heading p { margin: 0; color: #8fa9bd; font-size: 10px; line-height: 1.9; }
+.report-add-parameter { flex: 0 0 auto; min-height: 37px; padding: 0 13px; border: 1px solid rgba(105,224,223,.28); border-radius: 9px; background: rgba(34,126,147,.15); color: #a8efeb; font: inherit; font-size: 10px; cursor: pointer; }
+.report-add-parameter:hover { background: rgba(34,126,147,.28); }
+.report-parameter-list { display: grid; gap: 12px; }
+.report-empty-parameters { padding: 19px; border: 1px dashed rgba(158,196,222,.18); border-radius: 10px; color: #7897ad; text-align: center; font-size: 10px; line-height: 1.9; }
+.report-empty-parameters[hidden] { display: none; }
+.report-parameter-card { padding: 16px; border: 1px solid rgba(105,178,208,.17); border-radius: 12px; background: rgba(4,19,33,.35); }
+.report-parameter-card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; color: #9ddfe1; font-size: 11px; }
+.report-remove-parameter { padding: 5px 9px; border: 1px solid rgba(255,125,125,.2); border-radius: 7px; background: rgba(139,42,49,.1); color: #ffaaaa; font: inherit; font-size: 9px; cursor: pointer; }
+.report-parameter-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.report-parameter-grid .report-field { min-width: 0; }
+.report-parameter-grid input, .report-parameter-grid select { width: 100%; min-height: 41px; padding: 0 11px; border: 1px solid rgba(158,196,222,.2); border-radius: 9px; outline: none; background: rgba(4,17,30,.62); color: #e5f3fb; font: inherit; font-size: 11px; }
+.report-parameter-grid input:focus, .report-parameter-grid select:focus { border-color: rgba(105,224,223,.65); }
+.report-parameter-grid select option { background: #10283d; color: #e5f3fb; }
+.report-parameter-grid textarea { min-height: 78px; font-size: 11px; }
+.report-parameter-grid [hidden] { display: none !important; }
+.report-parameter-grid .parameter-list-source { grid-column: 1 / -1; }
+@media (max-width: 620px) {
+  .report-parameters-heading { align-items: flex-start; flex-direction: column; }
+  .report-parameter-grid { grid-template-columns: 1fr; }
+  .report-parameter-grid .parameter-list-source { grid-column: auto; }
+  .report-add-parameter { width: 100%; }
+}
