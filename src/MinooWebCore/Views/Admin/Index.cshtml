@@ -7,6 +7,7 @@
     var selectedTitle = ViewBag.SelectedTitle as string ?? "ایجاد گزارش";
     var selectedDescription = ViewBag.SelectedDescription as string ?? "";
     var savedParameters = JsonSerializer.Serialize(Model.Parameters);
+    var isEdit = ViewBag.IsEdit is bool editMode && editMode;
 }
 <main class="admin-page">
     <aside class="admin-sidebar">
@@ -60,13 +61,21 @@
                 <span class="report-builder-icon">▤</span>
             </div>
 
+            @if (TempData["AdminSuccessMessage"] is string adminSuccess)
+            {
+                <div class="report-message report-message-success" role="status"><span>✓</span>@adminSuccess</div>
+            }
             @if (ViewBag.SuccessMessage is string successMessage)
             {
                 <div class="report-message report-message-success" role="status"><span>✓</span>@successMessage</div>
             }
             <div asp-validation-summary="All" class="report-validation-summary"></div>
 
-            <form asp-controller="Admin" asp-action="CreateReport" method="post" enctype="multipart/form-data" class="report-form" id="reportForm">
+            <form asp-controller="Admin" asp-action="@(isEdit ? "UpdateReport" : "CreateReport")" method="post" enctype="multipart/form-data" class="report-form" id="reportForm">
+                @if (isEdit)
+                {
+                    <input asp-for="ReportId" type="hidden" />
+                }
                 <div class="report-field">
                     <label asp-for="ReportName">نام گزارش</label>
                     <input asp-for="ReportName" type="text" placeholder="مثلاً گزارش فروش ماهانه" autocomplete="off" required />
@@ -91,6 +100,10 @@
                         </div>
                         <span asp-validation-for="ExcelFile" class="report-field-error"></span>
                         <span class="report-field-help">فایل باید دقیقاً یک شیت داشته باشد و تمام ستون‌ها در ردیف اول دارای عنوان باشند.</span>
+                        @if (isEdit && !string.IsNullOrWhiteSpace(Model.ExistingExcelFileName))
+                        {
+                            <span class="report-field-help">فایل فعلی: @Model.ExistingExcelFileName (برای جایگزینی، فایل جدید انتخاب کنید.)</span>
+                        }
                     </div>
                 </div>
 
@@ -130,7 +143,8 @@
                 </div>
 
                 <div class="report-form-actions">
-                    <button type="submit" class="report-submit-button"><span>✓</span> بررسی مشخصات گزارش</button>
+                    <button type="submit" class="report-submit-button"><span>✓</span> @(isEdit ? "ذخیره تغییرات" : "ذخیره گزارش")</button>
+                    <a asp-controller="Admin" asp-action="ManageReports" class="report-cancel-button">مدیریت گزارش‌ها</a>
                 </div>
             </form>
         </section>
@@ -143,6 +157,8 @@
     <script>
         (() => {
             const source = document.getElementById('reportSource');
+            const isEdit = @isEdit.ToString().ToLowerInvariant();
+            const hasExistingExcel = @(!string.IsNullOrWhiteSpace(Model.ExistingExcelFileName)).ToString().ToLowerInvariant();
             const excelOptions = document.getElementById('excelOptions');
             const excelFile = document.getElementById('excelFile');
             const sqlOptions = document.getElementById('sqlOptions');
@@ -158,7 +174,7 @@
                 const isExcel = source.value === 'Excel';
                 excelOptions.hidden = !isExcel;
                 sqlOptions.hidden = isExcel;
-                excelFile.required = isExcel;
+                excelFile.required = isExcel && !(isEdit && hasExistingExcel);
                 sqlQuery.required = !isExcel;
                 if (!isExcel) excelFile.value = '';
             }
