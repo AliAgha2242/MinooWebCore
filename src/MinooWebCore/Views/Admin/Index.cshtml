@@ -71,7 +71,7 @@
             <form asp-controller="Admin" asp-action="CreateReport" method="post" enctype="multipart/form-data" class="report-form">
                 <div class="report-field">
                     <label asp-for="ReportName">نام گزارش</label>
-                    <input asp-for="ReportName" type="text" placeholder="مثلاً گزارش فروش ماهانه" autocomplete="off" />
+                    <input asp-for="ReportName" type="text" placeholder="مثلاً گزارش فروش ماهانه" autocomplete="off" required />
                     <span asp-validation-for="ReportName" class="report-field-error"></span>
                 </div>
 
@@ -96,14 +96,6 @@
                     </div>
                 </div>
 
-                <div id="sqlOptions" class="report-source-panel report-sql-placeholder" hidden>
-                    <span class="report-sql-icon">◈</span>
-                    <div>
-                        <strong>تنظیمات SQL</strong>
-                        <p>این بخش در مرحله بعد و پس از مشخص شدن جزئیات اتصال و کوئری تکمیل می‌شود.</p>
-                    </div>
-                </div>
-
                 <label class="report-checkbox">
                     <input asp-for="NeedsPagination" type="checkbox" />
                     <span class="report-checkbox-mark"></span>
@@ -125,13 +117,11 @@
         (() => {
             const source = document.getElementById('reportSource');
             const excelOptions = document.getElementById('excelOptions');
-            const sqlOptions = document.getElementById('sqlOptions');
             const excelFile = document.getElementById('excelFile');
 
             function updateSourceFields() {
                 const isExcel = source.value === 'Excel';
                 excelOptions.hidden = !isExcel;
-                sqlOptions.hidden = isExcel;
                 excelFile.required = isExcel;
                 if (!isExcel) excelFile.value = '';
             }
