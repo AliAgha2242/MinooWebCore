@@ -226,17 +226,26 @@ public sealed class AdminController : Controller
 
     private bool ValidateInput(CreateReportInput input, bool allowExistingExcel, bool hasExistingExcel = false)
     {
+        input.Parameters ??= [];
+
         if (string.IsNullOrWhiteSpace(input.ReportName))
             ModelState.AddModelError(nameof(input.ReportName), "نام گزارش را وارد کنید.");
+        else if (input.ReportName.Trim().Length > 150)
+            ModelState.AddModelError(nameof(input.ReportName), "نام گزارش نباید بیشتر از ۱۵۰ کاراکتر باشد.");
 
         if (input.Source is not ("Excel" or "Sql"))
-            ModelState.AddModelError(nameof(input.Source), "منبع گزارش را انتخاب کنید.");
+            ModelState.AddModelError(nameof(input.Source), "منبع گزارش معتبر نیست.");
 
-        if (input.NeedsPagination && (!input.PageSize.HasValue || input.PageSize.Value <= 0))
-            ModelState.AddModelError(nameof(input.PageSize), "تعداد رکورد در هر صفحه باید عددی بزرگ‌تر از صفر باشد.");
+        if (input.NeedsPagination && (!input.PageSize.HasValue || input.PageSize.Value is < 1 or > 50000))
+            ModelState.AddModelError(nameof(input.PageSize), "تعداد رکورد در هر صفحه باید بین ۱ تا ۵۰٬۰۰۰ باشد.");
 
-        if (input.Source == "Sql" && string.IsNullOrWhiteSpace(input.SqlQuery))
-            ModelState.AddModelError(nameof(input.SqlQuery), "Query گزارش را وارد کنید.");
+        if (input.Source == "Sql")
+        {
+            if (string.IsNullOrWhiteSpace(input.SqlQuery))
+                ModelState.AddModelError(nameof(input.SqlQuery), "Query گزارش را وارد کنید.");
+            else if (input.SqlQuery.Length > 100000)
+                ModelState.AddModelError(nameof(input.SqlQuery), "طول Query نباید بیشتر از ۱۰۰٬۰۰۰ کاراکتر باشد.");
+        }
 
         if (input.Source == "Excel")
         {
@@ -245,10 +254,10 @@ public sealed class AdminController : Controller
                 if (!allowExistingExcel || !hasExistingExcel)
                     ModelState.AddModelError(nameof(input.ExcelFile), "فایل اکسل را انتخاب کنید.");
             }
+            else if (input.ExcelFile.Length > 20L * 1024 * 1024)
+                ModelState.AddModelError(nameof(input.ExcelFile), "حجم فایل اکسل نباید بیشتر از ۲۰ مگابایت باشد.");
             else if (!Path.GetExtension(input.ExcelFile.FileName).Equals(".xlsx", StringComparison.OrdinalIgnoreCase))
-            {
-                ModelState.AddModelError(nameof(input.ExcelFile), "فعلاً فقط فایل‌های Excel با پسوند .xlsx پشتیبانی می‌شوند.");
-            }
+                ModelState.AddModelError(nameof(input.ExcelFile), "فقط فایل‌های Excel با پسوند .xlsx پشتیبانی می‌شوند.");
             else
             {
                 try
@@ -268,37 +277,59 @@ public sealed class AdminController : Controller
             }
         }
 
-        var allowedParameterTypes = new[] { "Text", "Number", "Date", "Checkbox", "RadioButton", "ListBox" };
+        if (input.Parameters.Count > 30)
+            ModelState.AddModelError(nameof(input.Parameters), "حداکثر ۳۰ پارامتر برای هر گزارش مجاز است.");
+
+        var allowedParameterTypes = new HashSet<string>(["Text", "Number", "Date", "Checkbox", "RadioButton", "ListBox"], StringComparer.Ordinal);
         var parameterNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         for (var index = 0; index < input.Parameters.Count; index++)
         {
             var parameter = input.Parameters[index];
-            if (string.IsNullOrWhiteSpace(parameter.Name) ||
-                !Regex.IsMatch(parameter.Name, "^[A-Za-z_][A-Za-z0-9_]*$"))
-                ModelState.AddModelError($"Parameters[{index}].Name", "نام فنی باید با حرف یا _ شروع شود و فقط شامل حروف انگلیسی، عدد و _ باشد.");
-            else if (!parameterNames.Add(parameter.Name.Trim()))
-                ModelState.AddModelError($"Parameters[{index}].Name", "نام فنی پارامترها باید یکتا باشد.");
+            var prefix = $"Parameters[{index}]";
+            parameter.Name ??= string.Empty;
+            parameter.DisplayName ??= string.Empty;
+            parameter.Type ??= string.Empty;
 
-            if (string.IsNullOrWhiteSpace(parameter.DisplayName))
-                ModelState.AddModelError($"Parameters[{index}].DisplayName", "عنوان پارامتر الزامی است.");
+            if (string.IsNullOrWhiteSpace(parameter.Name) || parameter.Name.Length > 64 ||
+                !Regex.IsMatch(parameter.Name, "^[A-Za-z_][A-Za-z0-9_]*$"))
+                ModelState.AddModelError($"{prefix}.Name", "نام فنی باید حداکثر ۶۴ کاراکتر و با حرف انگلیسی یا _ شروع شود؛ فقط حروف، عدد و _ مجاز است.");
+            else if (!parameterNames.Add(parameter.Name.Trim()))
+                ModelState.AddModelError($"{prefix}.Name", "نام فنی پارامترها باید یکتا باشد.");
+
+            if (string.IsNullOrWhiteSpace(parameter.DisplayName) || parameter.DisplayName.Trim().Length > 100)
+                ModelState.AddModelError($"{prefix}.DisplayName", "عنوان پارامتر الزامی است و نباید بیشتر از ۱۰۰ کاراکتر باشد.");
+
             if (!allowedParameterTypes.Contains(parameter.Type))
-                ModelState.AddModelError($"Parameters[{index}].Type", "نوع پارامتر معتبر نیست.");
+                ModelState.AddModelError($"{prefix}.Type", "نوع پارامتر معتبر نیست.");
 
             if (parameter.Type == "ListBox")
             {
-                if (string.IsNullOrWhiteSpace(parameter.DataSource))
-                    ModelState.AddModelError($"Parameters[{index}].DataSource", "Query منبع لیست‌باکس الزامی است.");
-                if (string.IsNullOrWhiteSpace(parameter.DisplayNameField))
-                    ModelState.AddModelError($"Parameters[{index}].DisplayNameField", "نام ستون نمایشی الزامی است.");
-                if (string.IsNullOrWhiteSpace(parameter.ValueField))
-                    ModelState.AddModelError($"Parameters[{index}].ValueField", "نام ستون مقدار الزامی است.");
+                if (string.IsNullOrWhiteSpace(parameter.DataSource) || parameter.DataSource.Length > 10000)
+                    ModelState.AddModelError($"{prefix}.DataSource", "Query منبع لیست‌باکس الزامی است و حداکثر ۱۰٬۰۰۰ کاراکتر می‌تواند باشد.");
+                if (!IsValidFieldIdentifier(parameter.DisplayNameField))
+                    ModelState.AddModelError($"{prefix}.DisplayNameField", "نام ستون نمایشی معتبر نیست.");
+                if (!IsValidFieldIdentifier(parameter.ValueField))
+                    ModelState.AddModelError($"{prefix}.ValueField", "نام ستون مقدار معتبر نیست.");
             }
-            if (parameter.Type == "RadioButton" && string.IsNullOrWhiteSpace(parameter.Options))
-                ModelState.AddModelError($"Parameters[{index}].Options", "گزینه‌های رادیوباتن را وارد کنید.");
+
+            if (parameter.Type == "RadioButton")
+            {
+                var options = (parameter.Options ?? string.Empty)
+                    .Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                if (options.Length == 0)
+                    ModelState.AddModelError($"{prefix}.Options", "حداقل یک گزینه برای رادیوباتن وارد کنید.");
+                else if (options.Length > 50 || options.Any(option => option.Length > 100) ||
+                         options.Distinct(StringComparer.OrdinalIgnoreCase).Count() != options.Length)
+                    ModelState.AddModelError($"{prefix}.Options", "گزینه‌ها باید یکتا باشند؛ حداکثر ۵۰ گزینه و هر گزینه حداکثر ۱۰۰ کاراکتر.");
+            }
         }
 
         return ModelState.IsValid;
     }
+
+    private static bool IsValidFieldIdentifier(string? value) =>
+        !string.IsNullOrWhiteSpace(value) && value.Length <= 128 &&
+        Regex.IsMatch(value, "^[A-Za-z_][A-Za-z0-9_]*$");
 
     private static void AddParameterEntities(ReportDefinition report, IReadOnlyList<ReportParameterInput> parameters)
     {
