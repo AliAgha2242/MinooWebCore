@@ -84,9 +84,16 @@ public sealed class AdminController : Controller
         }
         else
         {
-            var servers = _minooConfiguration.GetAllSerevr();
-            if (!servers.Any(x => x.VahedeTejariSN == input.SpecificServerVahedeTejariSN.Value))
-                ModelState.AddModelError(nameof(input.SpecificServerVahedeTejariSN), "سرور انتخاب‌شده در فهرست سرورهای سامانه وجود ندارد.");
+            try
+            {
+                var servers = _minooConfiguration.GetAllSerevr();
+                if (!servers.Any(x => x.VahedeTejariSN == input.SpecificServerVahedeTejariSN.Value))
+                    ModelState.AddModelError(nameof(input.SpecificServerVahedeTejariSN), "سرور انتخاب‌شده در فهرست سرورهای سامانه وجود ندارد.");
+            }
+            catch
+            {
+                ModelState.AddModelError(nameof(input.SpecificServerVahedeTejariSN), "فهرست سرورها در دسترس نیست؛ لطفاً تنظیمات سرورها را بررسی کنید.");
+            }
         }
 
         return ModelState.IsValid;
@@ -117,6 +124,20 @@ public sealed class AdminController : Controller
     {
         PrepareAdminView(ManageReportsSection);
         var reports = await _reportRepository.FindAsync(x => !x.IsDeleted, cancellationToken);
+        ViewBag.SoftwareGroupNames = (await _softwareGroupRepository.GetAllAsync(cancellationToken))
+            .ToDictionary(x => x.Id, x => x.Name);
+        ViewBag.ReportLevelNames = (await _reportLevelRepository.GetAllAsync(cancellationToken))
+            .ToDictionary(x => x.Id, x => x.Name);
+        try
+        {
+            ViewBag.ServerNames = _minooConfiguration.GetAllSerevr()
+                .GroupBy(x => x.VahedeTejariSN)
+                .ToDictionary(x => x.Key, x => x.First().ServerName + " · " + x.First().DatabaseName);
+        }
+        catch
+        {
+            ViewBag.ServerNames = new Dictionary<decimal, string>();
+        }
         return View("Reports", reports.OrderByDescending(x => x.CreatedAtUtc).ToList());
     }
 
