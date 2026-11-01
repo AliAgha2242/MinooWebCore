@@ -62,7 +62,7 @@ public sealed class AdminController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [RequestSizeLimit(20 * 1024 * 1024)]
+    [RequestSizeLimit(21 * 1024 * 1024)]
     public async Task<IActionResult> CreateReport(CreateReportInput input, CancellationToken cancellationToken)
     {
         PrepareAdminView(CreateReportSection);
@@ -145,7 +145,7 @@ public sealed class AdminController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [RequestSizeLimit(20 * 1024 * 1024)]
+    [RequestSizeLimit(21 * 1024 * 1024)]
     public async Task<IActionResult> UpdateReport(CreateReportInput input, CancellationToken cancellationToken)
     {
         PrepareAdminView(CreateReportSection);
