@@ -93,26 +93,28 @@ BEGIN
 END;
 GO
 
-IF NOT EXISTS (SELECT 1 FROM dbo.SoftwareGroups WHERE Id = 1)
-BEGIN
-    SET IDENTITY_INSERT dbo.SoftwareGroups ON;
-    INSERT INTO dbo.SoftwareGroups (Id, Name, IsActive) VALUES
-        (1, N'مالی', 1),
-        (2, N'انبار و برنامه‌ریزی', 1),
-        (3, N'فروش', 1),
-        (4, N'توزیع و پخش', 1);
-    SET IDENTITY_INSERT dbo.SoftwareGroups OFF;
-END;
+SET IDENTITY_INSERT dbo.SoftwareGroups ON;
+INSERT INTO dbo.SoftwareGroups (Id, Name, IsActive)
+SELECT seed.Id, seed.Name, 1
+FROM (VALUES
+    (1, N'مالی'),
+    (2, N'انبار و برنامه‌ریزی'),
+    (3, N'فروش'),
+    (4, N'توزیع و پخش')
+) AS seed(Id, Name)
+WHERE NOT EXISTS (SELECT 1 FROM dbo.SoftwareGroups existing WHERE existing.Id = seed.Id);
+SET IDENTITY_INSERT dbo.SoftwareGroups OFF;
 GO
 
-IF NOT EXISTS (SELECT 1 FROM dbo.ReportLevels WHERE Id = 1)
-BEGIN
-    SET IDENTITY_INSERT dbo.ReportLevels ON;
-    INSERT INTO dbo.ReportLevels (Id, Name, IsActive) VALUES
-        (1, N'هلدینگ مینو', 1),
-        (2, N'شرکت قاسم ایران', 1);
-    SET IDENTITY_INSERT dbo.ReportLevels OFF;
-END;
+SET IDENTITY_INSERT dbo.ReportLevels ON;
+INSERT INTO dbo.ReportLevels (Id, Name, IsActive)
+SELECT seed.Id, seed.Name, 1
+FROM (VALUES
+    (1, N'هلدینگ مینو'),
+    (2, N'شرکت قاسم ایران')
+) AS seed(Id, Name)
+WHERE NOT EXISTS (SELECT 1 FROM dbo.ReportLevels existing WHERE existing.Id = seed.Id);
+SET IDENTITY_INSERT dbo.ReportLevels OFF;
 GO
 
 /* Add metadata to existing report definitions; legacy reports default to Finance / Holding Minoo. */
