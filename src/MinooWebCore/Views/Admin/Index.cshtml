@@ -115,7 +115,7 @@
                 <div id="sqlOptions" class="report-source-panel" hidden>
                     <div class="report-field">
                         <label asp-for="SqlQuery">Query گزارش</label>
-                        <textarea asp-for="SqlQuery" id="sqlQuery" rows="7" dir="ltr" spellcheck="false" placeholder="SELECT ... FROM ..."></textarea>
+                        <textarea asp-for="SqlQuery" id="sqlQuery" maxlength="100000" rows="7" dir="ltr" spellcheck="false" placeholder="SELECT ... FROM ..."></textarea>
                         <span asp-validation-for="SqlQuery" class="report-field-error"></span>
                         <span class="report-field-help">فعلاً Query فقط دریافت و اعتبارسنجی اولیه می‌شود و اجرا نخواهد شد.</span>
                     </div>
@@ -132,17 +132,16 @@
                     </label>
                     <div class="report-field report-page-size" id="pageSizeField" hidden>
                         <label asp-for="PageSize">تعداد رکورد در هر صفحه</label>
-                        <input asp-for="PageSize" type="number" min="1" step="1" placeholder="مثلاً ۲۰" />
+                        <input asp-for="PageSize" type="number" min="1" max="50000" step="1" placeholder="مثلاً ۲۰" />
                         <span asp-validation-for="PageSize" class="report-field-error"></span>
                     </div>
                 </div>
 
                 </section>
                 <section class="report-parameters report-form-section">
-                    <div class="report-section-heading"><span class="report-step">بخش ۴</span><div><h3>پارامترهای ورودی</h3><p>فیلدهایی را تعریف کنید که کاربر هنگام مشاهده گزارش تکمیل می‌کند.</p></div></div>
                     <div class="report-parameters-heading">
                         <div>
-                            <span class="report-step">مرحله ۲ · پارامترهای ورودی</span>
+                            <span class="report-step">بخش ۴ · پارامترهای ورودی</span>
                             <h3>تعریف پارامترهای گزارش</h3>
                             <p>مشخص کنید کاربر هنگام مشاهده گزارش چه مقادیری را وارد یا انتخاب کند.</p>
                         </div>
@@ -150,7 +149,7 @@
                     </div>
                     <div id="parameterList" class="report-parameter-list"></div>
                     <div id="emptyParameters" class="report-empty-parameters">هنوز پارامتری تعریف نشده است. در صورت نیاز، «افزودن پارامتر» را انتخاب کنید.</div>
-                </div>
+                </section>
 
                 <div class="report-form-actions">
                     <button type="submit" class="report-submit-button"><span>✓</span> @(isEdit ? "ذخیره تغییرات" : "ذخیره گزارش")</button>
