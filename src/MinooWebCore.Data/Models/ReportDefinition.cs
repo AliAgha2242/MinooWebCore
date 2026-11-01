@@ -22,3 +22,20 @@ public sealed class ReportDefinition
 
     public ICollection<ReportParameterDefinition> Parameters { get; set; } = new List<ReportParameterDefinition>();
 }
+
+
+public sealed class SoftwareGroup
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public bool IsActive { get; set; } = true;
+    public ICollection<ReportDefinition> Reports { get; set; } = new List<ReportDefinition>();
+}
+
+public sealed class ReportLevel
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public bool IsActive { get; set; } = true;
+    public ICollection<ReportDefinition> Reports { get; set; } = new List<ReportDefinition>();
+}
