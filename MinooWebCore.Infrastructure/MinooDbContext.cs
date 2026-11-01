@@ -11,6 +11,8 @@ public sealed class MinooDbContext(DbContextOptions<MinooDbContext> options) : D
     public DbSet<UserModel> Users => Set<UserModel>();
     public DbSet<ReportDefinition> ReportDefinitions => Set<ReportDefinition>();
     public DbSet<ReportParameterDefinition> ReportParameters => Set<ReportParameterDefinition>();
+    public DbSet<SoftwareGroup> SoftwareGroups => Set<SoftwareGroup>();
+    public DbSet<ReportLevel> ReportLevels => Set<ReportLevel>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -31,6 +33,9 @@ public sealed class MinooDbContext(DbContextOptions<MinooDbContext> options) : D
             entity.Property(x => x.SourceType).HasMaxLength(20).IsRequired();
             entity.Property(x => x.ExcelFileName).HasMaxLength(260);
             entity.Property(x => x.ExcelContent).HasColumnType("varbinary(max)");
+            entity.Property(x => x.SpecificServerVahedeTejariSN).HasPrecision(18, 3);
+            entity.HasOne(x => x.SoftwareGroup).WithMany(x => x.Reports).HasForeignKey(x => x.SoftwareGroupId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(x => x.ReportLevel).WithMany(x => x.Reports).HasForeignKey(x => x.ReportLevelId).OnDelete(DeleteBehavior.Restrict);
             entity.HasQueryFilter(x => !x.IsDeleted);
             entity.HasIndex(x => x.Name)
                 .IsUnique()
@@ -40,6 +45,31 @@ public sealed class MinooDbContext(DbContextOptions<MinooDbContext> options) : D
                 .WithOne(x => x.Report)
                 .HasForeignKey(x => x.ReportDefinitionId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+
+        modelBuilder.Entity<SoftwareGroup>(entity =>
+        {
+            entity.ToTable("SoftwareGroups");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Name).HasMaxLength(150).IsRequired();
+            entity.HasIndex(x => x.Name).IsUnique();
+            entity.HasData(
+                new SoftwareGroup { Id = 1, Name = "مالی", IsActive = true },
+                new SoftwareGroup { Id = 2, Name = "انبار و برنامه‌ریزی", IsActive = true },
+                new SoftwareGroup { Id = 3, Name = "فروش", IsActive = true },
+                new SoftwareGroup { Id = 4, Name = "توزیع و پخش", IsActive = true });
+        });
+
+        modelBuilder.Entity<ReportLevel>(entity =>
+        {
+            entity.ToTable("ReportLevels");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.Name).HasMaxLength(150).IsRequired();
+            entity.HasIndex(x => x.Name).IsUnique();
+            entity.HasData(
+                new ReportLevel { Id = 1, Name = "هلدینگ مینو", IsActive = true },
+                new ReportLevel { Id = 2, Name = "شرکت قاسم ایران", IsActive = true });
         });
 
         modelBuilder.Entity<ReportParameterDefinition>(entity =>
