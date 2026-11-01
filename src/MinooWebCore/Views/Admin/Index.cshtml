@@ -77,21 +77,25 @@
                 {
                     <input asp-for="ReportId" type="hidden" />
                 }
-                <div class="report-field">
-                    <label asp-for="ReportName">نام گزارش</label>
-                    <input asp-for="ReportName" type="text" placeholder="مثلاً گزارش فروش ماهانه" autocomplete="off" required />
-                    <span asp-validation-for="ReportName" class="report-field-error"></span>
-                </div>
-
-                <div class="report-field">
-                    <label asp-for="Source">منبع گزارش</label>
-                    <select asp-for="Source" id="reportSource">
-                        <option value="Excel">فایل Excel</option>
-                        <option value="Sql">پایگاه داده SQL</option>
-                    </select>
-                    <span asp-validation-for="Source" class="report-field-error"></span>
-                </div>
-
+                <section class="report-form-section">
+                    <div class="report-section-heading"><span class="report-step">بخش ۱</span><div><h3>مشخصات اصلی</h3><p>نام گزارش و نوع منبع داده را مشخص کنید.</p></div></div>
+                    <div class="report-basic-grid">
+                        <div class="report-field">
+                            <label asp-for="ReportName">نام گزارش</label>
+                            <input asp-for="ReportName" type="text" maxlength="150" placeholder="مثلاً گزارش فروش ماهانه" autocomplete="off" required />
+                            <span asp-validation-for="ReportName" class="report-field-error"></span>
+                        </div>
+                        <div class="report-field">
+                            <label asp-for="Source">منبع گزارش</label>
+                            <select asp-for="Source" id="reportSource">
+                                <option value="Excel">فایل Excel</option><option value="Sql">پایگاه داده SQL</option>
+                            </select>
+                            <span asp-validation-for="Source" class="report-field-error"></span>
+                        </div>
+                    </div>
+                </section>
+                <section class="report-form-section">
+                    <div class="report-section-heading"><span class="report-step">بخش ۲</span><div><h3>تنظیمات منبع داده</h3><p>فایل اکسل یا Query گزارش را مشخص کنید.</p></div></div>
                 <div id="excelOptions" class="report-source-panel">
                     <div class="report-field">
                         <label asp-for="ExcelFile">فایل اکسل گزارش</label>
@@ -117,6 +121,9 @@
                     </div>
                 </div>
 
+                </section>
+                <section class="report-form-section">
+                    <div class="report-section-heading"><span class="report-step">بخش ۳</span><div><h3>تنظیمات نمایش</h3><p>در صورت نیاز، تعداد رکوردهای هر صفحه را تعیین کنید.</p></div></div>
                 <div class="report-pagination">
                     <label class="report-checkbox">
                         <input asp-for="NeedsPagination" id="needsPagination" type="checkbox" />
@@ -130,7 +137,9 @@
                     </div>
                 </div>
 
-                <div class="report-parameters">
+                </section>
+                <section class="report-parameters report-form-section">
+                    <div class="report-section-heading"><span class="report-step">بخش ۴</span><div><h3>پارامترهای ورودی</h3><p>فیلدهایی را تعریف کنید که کاربر هنگام مشاهده گزارش تکمیل می‌کند.</p></div></div>
                     <div class="report-parameters-heading">
                         <div>
                             <span class="report-step">مرحله ۲ · پارامترهای ورودی</span>
@@ -196,6 +205,10 @@
             }
 
             function addParameter(parameter = {}) {
+                if (parameterList.querySelectorAll('.report-parameter-card').length >= 30) {
+                    alert('حداکثر ۳۰ پارامتر می‌توانید تعریف کنید.');
+                    return;
+                }
                 const index = parameterIndex++;
                 const row = document.createElement('div');
                 row.className = 'report-parameter-card';
@@ -207,11 +220,11 @@
                     <div class="report-parameter-grid">
                         <div class="report-field">
                             <label>نام فنی پارامتر</label>
-                            <input name="Parameters[${index}].Name" type="text" dir="ltr" placeholder="FromDate" required />
+                            <input name="Parameters[${index}].Name" type="text" maxlength="64" pattern="[A-Za-z_][A-Za-z0-9_]*" dir="ltr" placeholder="FromDate" required />
                         </div>
                         <div class="report-field">
                             <label>عنوان نمایشی</label>
-                            <input name="Parameters[${index}].DisplayName" type="text" placeholder="از تاریخ" required />
+                            <input name="Parameters[${index}].DisplayName" type="text" maxlength="100" placeholder="از تاریخ" required />
                         </div>
                         <div class="report-field">
                             <label>نوع کنترل</label>
@@ -226,19 +239,19 @@
                         </div>
                         <div class="report-field parameter-extra" data-for-type="RadioButton">
                             <label>گزینه‌های رادیوباتن</label>
-                            <textarea name="Parameters[${index}].Options" rows="3" placeholder="هر گزینه در یک خط"></textarea>
+                            <textarea name="Parameters[${index}].Options" maxlength="5000" rows="3" placeholder="هر گزینه در یک خط"></textarea>
                         </div>
                         <div class="report-field parameter-extra parameter-list-source" data-for-type="ListBox">
                             <label>Query منبع گزینه‌های لیست‌باکس</label>
-                            <textarea name="Parameters[${index}].DataSource" rows="4" dir="ltr" spellcheck="false" placeholder="SELECT Id, Title FROM ..."></textarea>
+                            <textarea name="Parameters[${index}].DataSource" maxlength="10000" rows="4" dir="ltr" spellcheck="false" placeholder="SELECT Id, Title FROM ..."></textarea>
                         </div>
                         <div class="report-field parameter-extra" data-for-type="ListBox">
                             <label>نام ستون نمایشی (DisplayName)</label>
-                            <input name="Parameters[${index}].DisplayNameField" type="text" dir="ltr" placeholder="Title" />
+                            <input name="Parameters[${index}].DisplayNameField" type="text" maxlength="128" dir="ltr" placeholder="Title" />
                         </div>
                         <div class="report-field parameter-extra" data-for-type="ListBox">
                             <label>نام ستون مقدار (ValueName)</label>
-                            <input name="Parameters[${index}].ValueField" type="text" dir="ltr" placeholder="Id" />
+                            <input name="Parameters[${index}].ValueField" type="text" maxlength="128" dir="ltr" placeholder="Id" />
                         </div>
                     </div>`;
                 row.querySelector(`[name="Parameters[${index}].Name"]`).value = parameter.name || '';
@@ -271,6 +284,10 @@
             }
 
             document.getElementById('addParameter').addEventListener('click', () => addParameter());
+            document.getElementById('reportForm').addEventListener('submit', event => {
+                refreshParameterNumbers();
+                if (!event.currentTarget.checkValidity()) { event.preventDefault(); event.currentTarget.reportValidity(); }
+            });
             source.addEventListener('change', updateSourceFields);
             pagination.addEventListener('change', updatePagination);
             updateSourceFields();
