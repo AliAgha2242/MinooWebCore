@@ -505,26 +505,26 @@ public sealed class AdminController : Controller
         return string.Join('/', segments);
     }
 
-    public sealed class CreateReportInput
-    {
-        public string ReportName { get; set; } = string.Empty;
-        public string Source { get; set; } = "Excel";
-        public bool NeedsPagination { get; set; }
-        public int? PageSize { get; set; }
-        public IFormFile? ExcelFile { get; set; }
-        public string SqlQuery { get; set; } = string.Empty;
-        public List<ReportParameterInput> Parameters { get; set; } = [];
+    //public sealed class CreateReportInput
+    //{
+    //    public string ReportName { get; set; } = string.Empty;
+    //    public string Source { get; set; } = "Excel";
+    //    public bool NeedsPagination { get; set; }
+    //    public int? PageSize { get; set; }
+    //    public IFormFile? ExcelFile { get; set; }
+    //    public string SqlQuery { get; set; } = string.Empty;
+    //    public List<ReportParameterInput> Parameters { get; set; } = [];
 
-    }
+    //}
 
-    public sealed class ReportParameterInput
-    {
-        public string Name { get; set; } = string.Empty;
-        public string DisplayName { get; set; } = string.Empty;
-        public string Type { get; set; } = "Text";
-        public string DataSource { get; set; } = string.Empty;
-        public string DisplayNameField { get; set; } = string.Empty;
-        public string ValueField { get; set; } = string.Empty;
-        public string Options { get; set; } = string.Empty;
-    }
+    //public sealed class ReportParameterInput
+    //{
+    //    public string Name { get; set; } = string.Empty;
+    //    public string DisplayName { get; set; } = string.Empty;
+    //    public string Type { get; set; } = "Text";
+    //    public string DataSource { get; set; } = string.Empty;
+    //    public string DisplayNameField { get; set; } = string.Empty;
+    //    public string ValueField { get; set; } = string.Empty;
+    //    public string Options { get; set; } = string.Empty;
+    //}
 }
