@@ -42,10 +42,7 @@ public sealed class AdminController : Controller
             ModelState.AddModelError(nameof(input.Source), "منبع گزارش را انتخاب کنید.");
 
         if (input.Source == "Sql")
-        {
-            ViewBag.InfoMessage = "تنظیمات منبع SQL در مرحله بعد اضافه می‌شود.";
             return View("Index", input);
-        }
 
         if (input.ExcelFile is null || input.ExcelFile.Length == 0)
             ModelState.AddModelError(nameof(input.ExcelFile), "فایل اکسل را انتخاب کنید.");
