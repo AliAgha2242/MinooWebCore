@@ -241,7 +241,13 @@
 
             function refreshParameterNumbers() {
                 const rows = [...parameterList.querySelectorAll('.report-parameter-card')];
-                rows.forEach((row, index) => row.querySelector('.parameter-number').textContent = index + 1);
+                rows.forEach((row, index) => {
+                    row.querySelector('.parameter-number').textContent = index + 1;
+                    row.querySelectorAll('[name^="Parameters["]').forEach(field => {
+                        const propertyName = field.name.substring(field.name.lastIndexOf('].') + 2);
+                        field.name = `Parameters[${index}].${propertyName}`;
+                    });
+                });
                 emptyParameters.hidden = rows.length > 0;
             }
 
