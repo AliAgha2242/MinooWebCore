@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MinooWebCore.Data;
 using MinooWebCore.Data.Models;
+using MinooWebCore.Persistence.StaticConfiguration;
 
 namespace MinooWebCore.Controllers;
 
@@ -23,13 +24,72 @@ public sealed class AdminController : Controller
 
     private readonly IGenericRepository<ReportDefinition> _reportRepository;
     private readonly IGenericRepository<ReportParameterDefinition> _parameterRepository;
+    private readonly IGenericRepository<SoftwareGroup> _softwareGroupRepository;
+    private readonly IGenericRepository<ReportLevel> _reportLevelRepository;
+    private readonly IMinooConfiguration _minooConfiguration;
 
     public AdminController(
         IGenericRepository<ReportDefinition> reportRepository,
-        IGenericRepository<ReportParameterDefinition> parameterRepository)
+        IGenericRepository<ReportParameterDefinition> parameterRepository,
+        IGenericRepository<SoftwareGroup> softwareGroupRepository,
+        IGenericRepository<ReportLevel> reportLevelRepository,
+        IMinooConfiguration minooConfiguration)
     {
         _reportRepository = reportRepository;
         _parameterRepository = parameterRepository;
+        _softwareGroupRepository = softwareGroupRepository;
+        _reportLevelRepository = reportLevelRepository;
+        _minooConfiguration = minooConfiguration;
+    }
+
+    private async Task PrepareReportFormAsync(CancellationToken cancellationToken)
+    {
+        PrepareAdminView(CreateReportSection);
+        ViewBag.SoftwareGroups = (await _softwareGroupRepository.FindAsync(x => x.IsActive, cancellationToken))
+            .OrderBy(x => x.Name).ToList();
+        ViewBag.ReportLevels = (await _reportLevelRepository.FindAsync(x => x.IsActive, cancellationToken))
+            .OrderBy(x => x.Id).ToList();
+
+        try
+        {
+            ViewBag.AvailableServers = _minooConfiguration.GetAllSerevr()
+                .OrderBy(x => x.ServerName).ThenBy(x => x.DatabaseName).ToList();
+        }
+        catch
+        {
+            ViewBag.AvailableServers = new List<ServerInfo>();
+            ViewBag.ServerConfigurationError = "دریافت فهرست سرورها از تنظیمات سامانه امکان‌پذیر نیست.";
+        }
+    }
+
+    private async Task<bool> ValidateReportMetadataAsync(CreateReportInput input, CancellationToken cancellationToken)
+    {
+        var groups = await _softwareGroupRepository.FindAsync(
+            x => x.Id == input.SoftwareGroupId && x.IsActive, cancellationToken);
+        if (groups.Count == 0)
+            ModelState.AddModelError(nameof(input.SoftwareGroupId), "گروه نرم‌افزاری معتبر را انتخاب کنید.");
+
+        var levels = await _reportLevelRepository.FindAsync(
+            x => x.Id == input.ReportLevelId && x.IsActive, cancellationToken);
+        if (levels.Count == 0)
+            ModelState.AddModelError(nameof(input.ReportLevelId), "سطح گزارش معتبر را انتخاب کنید.");
+
+        if (!input.UseSpecificServer)
+        {
+            input.SpecificServerVahedeTejariSN = null;
+        }
+        else if (!input.SpecificServerVahedeTejariSN.HasValue)
+        {
+            ModelState.AddModelError(nameof(input.SpecificServerVahedeTejariSN), "برای استفاده از سرور اختصاصی، یک سرور انتخاب کنید.");
+        }
+        else
+        {
+            var servers = _minooConfiguration.GetAllSerevr();
+            if (!servers.Any(x => x.VahedeTejariSN == input.SpecificServerVahedeTejariSN.Value))
+                ModelState.AddModelError(nameof(input.SpecificServerVahedeTejariSN), "سرور انتخاب‌شده در فهرست سرورهای سامانه وجود ندارد.");
+        }
+
+        return ModelState.IsValid;
     }
 
     private void PrepareAdminView(string section = CreateReportSection)
@@ -45,9 +105,9 @@ public sealed class AdminController : Controller
     }
 
     [HttpGet]
-    public IActionResult Index(string section = CreateReportSection)
+    public async Task<IActionResult> Index(string section = CreateReportSection, CancellationToken cancellationToken = default)
     {
-        PrepareAdminView(CreateReportSection);
+        await PrepareReportFormAsync(cancellationToken);
         ViewBag.IsEdit = false;
         return View(new CreateReportInput());
     }
@@ -65,10 +125,11 @@ public sealed class AdminController : Controller
     [RequestSizeLimit(21 * 1024 * 1024)]
     public async Task<IActionResult> CreateReport(CreateReportInput input, CancellationToken cancellationToken)
     {
-        PrepareAdminView(CreateReportSection);
+        await PrepareReportFormAsync(cancellationToken);
         ViewBag.IsEdit = false;
 
-        if (!ValidateInput(input, allowExistingExcel: false))
+        if (!await ValidateReportMetadataAsync(input, cancellationToken) ||
+            !ValidateInput(input, allowExistingExcel: false))
             return View("Index", input);
 
         byte[]? excelContent = null;
@@ -90,6 +151,9 @@ public sealed class AdminController : Controller
             ExcelContent = excelContent,
             NeedsPagination = input.NeedsPagination,
             PageSize = input.NeedsPagination ? input.PageSize : null,
+            SoftwareGroupId = input.SoftwareGroupId,
+            ReportLevelId = input.ReportLevelId,
+            SpecificServerVahedeTejariSN = input.UseSpecificServer ? input.SpecificServerVahedeTejariSN : null,
             CreatedAtUtc = DateTime.UtcNow
         };
 
@@ -124,6 +188,10 @@ public sealed class AdminController : Controller
             Source = report.SourceType,
             NeedsPagination = report.NeedsPagination,
             PageSize = report.PageSize,
+            SoftwareGroupId = report.SoftwareGroupId,
+            ReportLevelId = report.ReportLevelId,
+            UseSpecificServer = report.SpecificServerVahedeTejariSN.HasValue,
+            SpecificServerVahedeTejariSN = report.SpecificServerVahedeTejariSN,
             SqlQuery = report.SqlQuery ?? string.Empty,
             ExistingExcelFileName = report.ExcelFileName,
             Parameters = parameters.OrderBy(x => x.SortOrder).Select(x => new ReportParameterInput
@@ -138,7 +206,7 @@ public sealed class AdminController : Controller
             }).ToList()
         };
 
-        PrepareAdminView(CreateReportSection);
+        await PrepareReportFormAsync(cancellationToken);
         ViewBag.IsEdit = true;
         return View("Index", input);
     }
@@ -148,7 +216,7 @@ public sealed class AdminController : Controller
     [RequestSizeLimit(21 * 1024 * 1024)]
     public async Task<IActionResult> UpdateReport(CreateReportInput input, CancellationToken cancellationToken)
     {
-        PrepareAdminView(CreateReportSection);
+        await PrepareReportFormAsync(cancellationToken);
         ViewBag.IsEdit = true;
 
         var report = (await _reportRepository.FindAsync(
@@ -156,7 +224,8 @@ public sealed class AdminController : Controller
         if (report is null)
             return NotFound();
 
-        if (!ValidateInput(input, allowExistingExcel: true, hasExistingExcel: report.ExcelContent is { Length: > 0 }))
+        if (!await ValidateReportMetadataAsync(input, cancellationToken) ||
+            !ValidateInput(input, allowExistingExcel: true, hasExistingExcel: report.ExcelContent is { Length: > 0 }))
         {
             input.ExistingExcelFileName = report.ExcelFileName;
             return View("Index", input);
@@ -167,6 +236,9 @@ public sealed class AdminController : Controller
         report.SqlQuery = input.Source == "Sql" ? input.SqlQuery.Trim() : null;
         report.NeedsPagination = input.NeedsPagination;
         report.PageSize = input.NeedsPagination ? input.PageSize : null;
+        report.SoftwareGroupId = input.SoftwareGroupId;
+        report.ReportLevelId = input.ReportLevelId;
+        report.SpecificServerVahedeTejariSN = input.UseSpecificServer ? input.SpecificServerVahedeTejariSN : null;
         report.UpdatedAtUtc = DateTime.UtcNow;
 
         if (input.Source == "Sql")
@@ -357,6 +429,10 @@ public sealed class AdminController : Controller
         public string Source { get; set; } = "Excel";
         public bool NeedsPagination { get; set; }
         public int? PageSize { get; set; }
+        public int SoftwareGroupId { get; set; }
+        public int ReportLevelId { get; set; }
+        public bool UseSpecificServer { get; set; }
+        public decimal? SpecificServerVahedeTejariSN { get; set; }
         public IFormFile? ExcelFile { get; set; }
         public string ExistingExcelFileName { get; set; } = string.Empty;
         public string SqlQuery { get; set; } = string.Empty;
