@@ -341,10 +341,10 @@ public sealed class AdminController : Controller
                 Name = item.Name.Trim(),
                 DisplayName = item.DisplayName.Trim(),
                 Type = item.Type,
-                DataSource = item.Type == "ListBox" ? item.DataSource : null,
-                DisplayNameField = item.Type == "ListBox" ? item.DisplayNameField : null,
-                ValueField = item.Type == "ListBox" ? item.ValueField : null,
-                Options = item.Type == "RadioButton" ? item.Options : null,
+                DataSource = item.Type == "ListBox" ? item.DataSource?.Trim() : null,
+                DisplayNameField = item.Type == "ListBox" ? item.DisplayNameField?.Trim() : null,
+                ValueField = item.Type == "ListBox" ? item.ValueField?.Trim() : null,
+                Options = item.Type == "RadioButton" ? item.Options?.Trim() : null,
                 SortOrder = index
             });
         }
@@ -368,10 +368,14 @@ public sealed class AdminController : Controller
         public string Name { get; set; } = string.Empty;
         public string DisplayName { get; set; } = string.Empty;
         public string Type { get; set; } = "Text";
-        public string DataSource { get; set; } = string.Empty;
-        public string DisplayNameField { get; set; } = string.Empty;
-        public string ValueField { get; set; } = string.Empty;
-        public string Options { get; set; } = string.Empty;
+
+        // These fields are required only for their matching parameter type.
+        // Nullable declarations prevent MVC's implicit [Required] validation
+        // from rejecting parameters that do not use these fields.
+        public string? DataSource { get; set; }
+        public string? DisplayNameField { get; set; }
+        public string? ValueField { get; set; }
+        public string? Options { get; set; }
     }
 
     private static string? ValidateExcelFile(IFormFile file)
