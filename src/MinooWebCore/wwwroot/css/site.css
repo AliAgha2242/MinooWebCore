@@ -178,6 +178,12 @@ h1 { font-size: 21px; line-height: 1.4; text-align: center; margin: 0; font-weig
 .choose-group-button { display: inline-flex; align-items: center; justify-content: center; gap: 12px; min-height: 38px; padding: 0 15px; border: 1px solid rgba(105,224,223,.3); border-radius: 10px; color: #f5fbff; background: linear-gradient(100deg, #1676bd, #1b9bc8 65%, #29aeb7); box-shadow: 0 8px 22px rgba(18,132,190,.14); cursor: pointer; font-size: 12px; transition: filter .2s, transform .2s; }
 .choose-group-button:hover { filter: brightness(1.1); transform: translateY(-1px); }
 .choose-group-button span { font-size: 17px; line-height: 1; }
+.report-subgroups { display: grid; gap: 9px; margin-top: 12px; }
+.report-subgroup { background: rgba(5, 20, 34, .58); }
+.report-subgroup summary { min-height: 56px; }
+.report-subgroup .group-details { padding-bottom: 13px; }
+.report-subgroup .group-details p { margin: 0; color: #a4bfd0; line-height: 1.9; }
+
 .group-selection-message { display: flex; align-items: center; gap: 12px; padding: 13px 16px; margin-bottom: 15px; border: 1px solid rgba(91,205,173,.28); border-radius: 13px; background: rgba(24,121,102,.1); color: #b7eee1; }
 .selection-check { display: grid; place-items: center; flex: 0 0 32px; width: 32px; height: 32px; border-radius: 50%; background: rgba(91,205,173,.14); color: #78e0c3; }
 .group-selection-message strong, .group-selection-message small { display: block; }

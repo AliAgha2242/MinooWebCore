@@ -11,9 +11,15 @@ public sealed class HomeController : Controller
 {
     private static readonly Dictionary<string, string[]> SoftwareGroups = new()
     {
-        ["گروه نرم افزاری گزارشات مبتنی بر وب"] = ["برنامه یک", "برنامه دو", "برنامه سه", "گزارشات شرکت قاسم ایران و زیرمجموعه‌ها", "گزارشات هلدینگ مینو و زیرمجموعه‌ها"],
+        ["گروه نرم افزاری گزارشات مبتنی بر وب"] = ["برنامه یک", "برنامه دو", "برنامه سه"],
         ["گروه نرم افزاری مالی"] = ["اجرا نگاشت", "برنامه دو", "برنامه سه"]
     };
+
+    private static readonly string[] ReportSubgroups =
+    [
+        "گزارشات شرکت قاسم ایران و زیرمجموعه‌ها",
+        "گزارشات هلدینگ مینو و زیرمجموعه‌ها"
+    ];
 
     private readonly IRedisService _redis;
 

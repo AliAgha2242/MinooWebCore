@@ -5,6 +5,7 @@
     var selectedGroup = TempData["SelectedGroup"] as string;
     var selectedSoftware = TempData["SelectedSoftware"] as string;
     var favoriteApplications = ViewBag.FavoriteApplications as List<FavoriteApplication> ?? [];
+    var reportSubgroups = ViewBag.ReportSubgroups as string[] ?? [];
 }
 <main class="groups-page">
     <div class="groups-glow groups-glow-one"></div>
@@ -113,8 +114,28 @@
                             }
                         </div>
                     </div>
+                    @if (group.Key == "گروه نرم افزاری گزارشات مبتنی بر وب")
+                    {
+                        <div class="report-subgroups" aria-label="زیرگروه‌های گزارشات">
+                            @for (var subgroupIndex = 0; subgroupIndex < reportSubgroups.Length; subgroupIndex++)
+                            {
+                                <details class="group-accordion report-subgroup">
+                                    <summary>
+                                        <span class="group-number">@((subgroupIndex + 1).ToString("00"))</span>
+                                        <span class="group-title">@reportSubgroups[subgroupIndex]</span>
+                                        <span class="group-chevron" aria-hidden="true">⌄</span>
+                                    </summary>
+                                    <div class="group-details">
+                                        <p>@(subgroupIndex == 0
+                                            ? "دسترسی به گزارشات شرکت قاسم ایران و شرکت‌های زیرمجموعه آن."
+                                            : "دسترسی به گزارشات هلدینگ مینو و شرکت‌های زیرمجموعه آن.")</p>
+                                    </div>
+                                </details>
+                            }
+                        </div>
+                    }
                 </details>
-            }
+            } 
         </div>
 
         <p class="groups-footnote"><span>✦</span> اپلیکیشن‌های منتخب شما به‌صورت اختصاصی برای حساب کاربری‌تان ذخیره می‌شوند.</p>
