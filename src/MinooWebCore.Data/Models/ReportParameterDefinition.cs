@@ -7,6 +7,8 @@ public sealed class ReportParameterDefinition
     public string Name { get; set; } = string.Empty;
     public string DisplayName { get; set; } = string.Empty;
     public string Type { get; set; } = "Text";
+    public int ParameterTypeId { get; set; } = 1;
+    public ParameterType ParameterType { get; set; } = null!;
     public string? DataSource { get; set; }
     public string? DisplayNameField { get; set; }
     public string? ValueField { get; set; }
