@@ -99,9 +99,9 @@ public sealed class AccountController : Controller
             return Forbid();
 
         if (!Uri.TryCreate(reportsBaseUrl, UriKind.Absolute, out var baseUri) ||
-            baseUri.Scheme != Uri.UriSchemeHttps)
+            (baseUri.Scheme != Uri.UriSchemeHttp && baseUri.Scheme != Uri.UriSchemeHttps))
         {
-            _logger.LogError("The HTTPS Reports base URL is not configured.");
+            _logger.LogError("The Reports base URL must be an absolute HTTP or HTTPS URL.");
             return StatusCode(StatusCodes.Status503ServiceUnavailable,
                 "سامانه گزارشات هنوز در تنظیمات درگاه مادر تعریف نشده است.");
         }
