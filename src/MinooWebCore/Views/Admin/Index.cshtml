@@ -333,6 +333,10 @@
                 row.querySelector(`[name="Parameters[${index}].DisplayNameField"]`).value = parameter.displayNameField || '';
                 row.querySelector(`[name="Parameters[${index}].ValueField"]`).value = parameter.valueField || '';
                 row.querySelector(`[name="Parameters[${index}].Options"]`).value = parameter.options || '';
+                row.querySelector(`[name="Parameters[${index}].CalendarType"]`).value = parameter.calendarType || 'Gregorian';
+                row.querySelector(`[name="Parameters[${index}].DateFormat"]`).value = parameter.dateFormat || 'yyyy-MM-dd';
+                row.querySelector(`[name="Parameters[${index}].TimeFormat"]`).value = parameter.timeFormat || 'HH:mm:ss';
+                row.querySelector(`[name="Parameters[${index}].DateTimeSeparator"]`).value = parameter.dateTimeSeparator || ' ';
                 row.querySelector('.parameter-type').addEventListener('change', () => updateParameterType(row));
                 row.querySelector('.report-remove-parameter').addEventListener('click', () => {
                     row.remove();
@@ -371,7 +375,9 @@
             existingParameters.forEach(parameter => addParameter({
                 name: parameter.Name, displayName: parameter.DisplayName, type: parameter.Type,
                 dataSource: parameter.DataSource, displayNameField: parameter.DisplayNameField,
-                valueField: parameter.ValueField, options: parameter.Options
+                valueField: parameter.ValueField, options: parameter.Options,
+                calendarType: parameter.CalendarType, dateFormat: parameter.DateFormat,
+                timeFormat: parameter.TimeFormat, dateTimeSeparator: parameter.DateTimeSeparator
             }));
             refreshParameterNumbers();
         })();
