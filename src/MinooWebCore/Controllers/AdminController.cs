@@ -373,7 +373,7 @@ public sealed class AdminController : Controller
         if (input.Parameters.Count > 30)
             ModelState.AddModelError(nameof(input.Parameters), "حداکثر ۳۰ پارامتر برای هر گزارش مجاز است.");
 
-        var allowedParameterTypes = new HashSet<string>(new[] { "Text", "Number", "Date", "Checkbox", "RadioButton", "ListBox" }, StringComparer.Ordinal);
+        var allowedParameterTypes = new HashSet<string>(new[] { "Text", "Number", "Date", "PersianDate", "Checkbox", "RadioButton", "ListBox", "ComboBox" }, StringComparer.Ordinal);
         var parameterNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         for (var index = 0; index < input.Parameters.Count; index++)
         {
@@ -395,7 +395,7 @@ public sealed class AdminController : Controller
             if (!allowedParameterTypes.Contains(parameter.Type))
                 ModelState.AddModelError($"{prefix}.Type", "نوع پارامتر معتبر نیست.");
 
-            if (parameter.Type == "ListBox")
+            if (parameter.Type is "ListBox" or "ComboBox")
             {
                 if (string.IsNullOrWhiteSpace(parameter.DataSource) || parameter.DataSource.Length > 10000)
                     ModelState.AddModelError($"{prefix}.DataSource", "Query منبع لیست‌باکس الزامی است و حداکثر ۱۰٬۰۰۰ کاراکتر می‌تواند باشد.");
@@ -434,9 +434,10 @@ public sealed class AdminController : Controller
                 Name = item.Name.Trim(),
                 DisplayName = item.DisplayName.Trim(),
                 Type = item.Type,
-                DataSource = item.Type == "ListBox" ? item.DataSource?.Trim() : null,
-                DisplayNameField = item.Type == "ListBox" ? item.DisplayNameField?.Trim() : null,
-                ValueField = item.Type == "ListBox" ? item.ValueField?.Trim() : null,
+                ParameterTypeId = item.Type switch { "Text" => 1, "Number" => 2, "Date" => 3, "PersianDate" => 4, "ListBox" => 5, "RadioButton" => 6, "ComboBox" => 7, "Checkbox" => 8, _ => 1 },
+                DataSource = item.Type is "ListBox" or "ComboBox" ? item.DataSource?.Trim() : null,
+                DisplayNameField = item.Type is "ListBox" or "ComboBox" ? item.DisplayNameField?.Trim() : null,
+                ValueField = item.Type is "ListBox" or "ComboBox" ? item.ValueField?.Trim() : null,
                 Options = item.Type == "RadioButton" ? item.Options?.Trim() : null,
                 SortOrder = index
             });
