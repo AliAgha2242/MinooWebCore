@@ -296,17 +296,19 @@
                             <select name="Parameters[${index}].Type" class="parameter-type">
                                 <option value="Text">متن</option>
                                 <option value="Number">عدد</option>
-                                <option value="Date">تاریخ (ورودی متنی)</option>
+                                <option value="Date">تاریخ میلادی</option>
+                                <option value="PersianDate">تاریخ شمسی (۱۴۰۵۰۱۰۱)</option>
                                 <option value="Checkbox">چک‌باکس</option>
                                 <option value="RadioButton">رادیوباتن</option>
                                 <option value="ListBox">لیست‌باکس</option>
+                                <option value="ComboBox">کمبوباکس تک‌مقداره</option>
                             </select>
                         </div>
                         <div class="report-field parameter-extra" data-for-type="RadioButton">
                             <label>گزینه‌های رادیوباتن</label>
                             <textarea name="Parameters[${index}].Options" maxlength="5000" rows="3" placeholder="هر گزینه در یک خط"></textarea>
                         </div>
-                        <div class="report-field parameter-extra parameter-list-source" data-for-type="ListBox">
+                        <div class="report-field parameter-extra parameter-list-source" data-for-type="ListBox ComboBox">
                             <label>Query منبع گزینه‌های لیست‌باکس</label>
                             <textarea name="Parameters[${index}].DataSource" maxlength="10000" rows="4" dir="ltr" spellcheck="false" placeholder="SELECT Id, Title FROM ..."></textarea>
                         </div>
