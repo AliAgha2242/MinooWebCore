@@ -296,15 +296,20 @@
                             <select name="Parameters[${index}].Type" class="parameter-type">
                                 <option value="Text">متن</option>
                                 <option value="Number">عدد</option>
-                                <option value="Date">تاریخ میلادی</option>
-                                <option value="PersianDate">تاریخ شمسی (۱۴۰۵۰۱۰۱)</option>
+                                <option value="Date">تاریخ</option>
+                                <option value="Time">ساعت</option>
+                                <option value="DateTime">تاریخ و ساعت</option>
                                 <option value="Checkbox">چک‌باکس</option>
                                 <option value="RadioButton">رادیوباتن</option>
                                 <option value="ListBox">لیست‌باکس</option>
                                 <option value="ComboBox">کمبوباکس تک‌مقداره</option>
                             </select>
                         </div>
-                        <div class="report-field parameter-extra" data-for-type="RadioButton">
+                        <div class="report-field parameter-extra" data-for-type="Date DateTime"><label>تقویم تاریخ</label><select name="Parameters[${index}].CalendarType"><option value="Gregorian">میلادی</option><option value="Persian">شمسی</option></select></div>
+<div class="report-field parameter-extra" data-for-type="Date DateTime"><label>فرمت تاریخ</label><select name="Parameters[${index}].DateFormat"><option value="yyyyMMdd">14050101</option><option value="yyyy/MM/dd">1405/01/01</option><option value="yyyy-MM-dd">1405-01-01</option></select></div>
+<div class="report-field parameter-extra" data-for-type="Time DateTime"><label>فرمت ساعت</label><select name="Parameters[${index}].TimeFormat"><option value="HH:mm">14:30</option><option value="HH:mm:ss">14:30:45</option></select></div>
+<div class="report-field parameter-extra" data-for-type="DateTime"><label>جداکننده تاریخ و ساعت</label><select name="Parameters[${index}].DateTimeSeparator"><option value=" ">فاصله</option><option value="T">T</option></select></div>
+<div class="report-field parameter-extra" data-for-type="RadioButton">
                             <label>گزینه‌های رادیوباتن</label>
                             <textarea name="Parameters[${index}].Options" maxlength="5000" rows="3" placeholder="هر گزینه در یک خط"></textarea>
                         </div>
