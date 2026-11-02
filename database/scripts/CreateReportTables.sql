@@ -210,3 +210,51 @@ GO
 IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = N'FK_ReportParameters_ParameterTypes')
     ALTER TABLE dbo.ReportParameters ADD CONSTRAINT FK_ReportParameters_ParameterTypes FOREIGN KEY (ParameterTypeId) REFERENCES dbo.ParameterTypes(Id);
 GO
+
+/* Date, time and calendar display metadata */
+IF COL_LENGTH(N'dbo.ReportParameters', N'CalendarType') IS NULL ALTER TABLE dbo.ReportParameters ADD CalendarType NVARCHAR(20) NULL;
+IF COL_LENGTH(N'dbo.ReportParameters', N'DateFormat') IS NULL ALTER TABLE dbo.ReportParameters ADD DateFormat NVARCHAR(20) NULL;
+IF COL_LENGTH(N'dbo.ReportParameters', N'TimeFormat') IS NULL ALTER TABLE dbo.ReportParameters ADD TimeFormat NVARCHAR(20) NULL;
+IF COL_LENGTH(N'dbo.ReportParameters', N'DateTimeSeparator') IS NULL ALTER TABLE dbo.ReportParameters ADD DateTimeSeparator NVARCHAR(5) NULL;
+GO
+
+/* Add Time and DateTime types without changing existing IDs. */
+IF NOT EXISTS (SELECT 1 FROM dbo.ParameterTypes WHERE Code = N'Time')
+    INSERT dbo.ParameterTypes (Id, Code, Title, RequiresDataSource, RequiresOptions, IsActive)
+    VALUES (9, N'Time', N'ساعت', 0, 0, 1);
+IF NOT EXISTS (SELECT 1 FROM dbo.ParameterTypes WHERE Code = N'DateTime')
+    INSERT dbo.ParameterTypes (Id, Code, Title, RequiresDataSource, RequiresOptions, IsActive)
+    VALUES (10, N'DateTime', N'تاریخ و ساعت', 0, 0, 1);
+GO
+
+/* Migrate legacy PersianDate definitions to Date + Persian calendar. */
+UPDATE dbo.ReportParameters
+SET Type = N'Date', ParameterTypeId = 3,
+    CalendarType = N'Persian',
+    DateFormat = COALESCE(DateFormat, N'yyyyMMdd')
+WHERE Type = N'PersianDate' OR ParameterTypeId = 4;
+GO
+
+UPDATE dbo.ReportParameters
+SET CalendarType = COALESCE(CalendarType, N'Gregorian'),
+    DateFormat = COALESCE(DateFormat, N'yyyy-MM-dd')
+WHERE Type = N'Date';
+UPDATE dbo.ReportParameters
+SET TimeFormat = COALESCE(TimeFormat, N'HH:mm:ss')
+WHERE Type = N'Time';
+UPDATE dbo.ReportParameters
+SET CalendarType = COALESCE(CalendarType, N'Gregorian'),
+    DateFormat = COALESCE(DateFormat, N'yyyy-MM-dd'),
+    TimeFormat = COALESCE(TimeFormat, N'HH:mm:ss'),
+    DateTimeSeparator = COALESCE(DateTimeSeparator, N' ')
+WHERE Type = N'DateTime';
+GO
+
+IF EXISTS (SELECT 1 FROM sys.check_constraints
+           WHERE name = N'CK_ReportParameters_Type'
+             AND parent_object_id = OBJECT_ID(N'dbo.ReportParameters'))
+    ALTER TABLE dbo.ReportParameters DROP CONSTRAINT CK_ReportParameters_Type;
+ALTER TABLE dbo.ReportParameters ADD CONSTRAINT CK_ReportParameters_Type
+    CHECK (Type IN (N'Text', N'Number', N'Date', N'PersianDate', N'Time', N'DateTime',
+                    N'Checkbox', N'RadioButton', N'ListBox', N'ComboBox'));
+GO
