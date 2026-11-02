@@ -109,7 +109,7 @@ public sealed class AccountController : Controller
         var ticket = await _reportsSso.IssueAsync(
             new ReportsSsoIdentity(userId, userCode, userName), cancellationToken);
 
-        ViewBag.ReportsConsumeUrl = new Uri(baseUri, "sso/consume").ToString();
+        ViewBag.ReportsConsumeUrl = new Uri(baseUri.AbsoluteUri.TrimEnd('/') + "/sso/consume").ToString();
         ViewBag.SsoTicket = ticket;
         Response.Headers.CacheControl = "no-store, no-cache";
         Response.Headers["Referrer-Policy"] = "no-referrer";
