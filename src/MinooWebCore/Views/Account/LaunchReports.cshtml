@@ -1,0 +1,26 @@
+@{
+    Layout = null;
+    ViewData["Title"] = "ورود به سامانه گزارشات";
+}
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="referrer" content="no-referrer" />
+    <title>ورود به سامانه گزارشات</title>
+</head>
+<body>
+    <main>
+        <h1>در حال ورود به سامانه گزارشات</h1>
+        <p>لطفاً چند لحظه صبر کنید...</p>
+        <form id="reports-sso-form" method="post" action="@ViewBag.ReportsConsumeUrl" autocomplete="off">
+            <input type="hidden" name="ticket" value="@ViewBag.SsoTicket" />
+            <button type="submit">ادامه به سامانه گزارشات</button>
+        </form>
+    </main>
+    <script>
+        document.getElementById("reports-sso-form").submit();
+    </script>
+</body>
+</html>
