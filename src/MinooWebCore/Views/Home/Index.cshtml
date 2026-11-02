@@ -99,6 +99,14 @@
                                         </span>
                                     </div>
                                 }
+                                else if (software is "گزارشات شرکت قاسم ایران و زیرمجموعه‌ها" or "گزارشات هلدینگ مینو و زیرمجموعه‌ها")
+                                {
+                                    <a asp-controller="Account" asp-action="LaunchReports" class="software-item software-item-form" aria-label="ورود به نرم‌افزار @software">
+                                        <span class="software-icon" aria-hidden="true">▦</span>
+                                        <span class="software-name">@software</span>
+                                        <span class="choose-software-button">ورود <span aria-hidden="true">←</span></span>
+                                    </a>
+                                }
                                 else
                                 {
                                     <form asp-controller="Home" asp-action="SelectSoftware" method="post" class="software-item software-item-form" data-software-form tabindex="0" aria-label="ورود به نرم‌افزار @software">
