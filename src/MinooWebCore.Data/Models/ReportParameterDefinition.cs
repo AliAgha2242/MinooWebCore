@@ -13,6 +13,10 @@ public sealed class ReportParameterDefinition
     public string? DisplayNameField { get; set; }
     public string? ValueField { get; set; }
     public string? Options { get; set; }
+    public string? CalendarType { get; set; }
+    public string? DateFormat { get; set; }
+    public string? TimeFormat { get; set; }
+    public string? DateTimeSeparator { get; set; }
     public int SortOrder { get; set; }
 
     public ReportDefinition Report { get; set; } = null!;
