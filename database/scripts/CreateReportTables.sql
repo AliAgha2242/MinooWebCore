@@ -155,6 +155,16 @@ IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_ReportDefinitions_Sof
         ON dbo.ReportDefinitions(SoftwareGroupId, ReportLevelId);
 GO
 
+
+IF OBJECT_ID(N'dbo.ReportParameters', N'U') IS NOT NULL
+BEGIN
+    IF EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = N'CK_ReportParameters_Type' AND parent_object_id = OBJECT_ID(N'dbo.ReportParameters'))
+        ALTER TABLE dbo.ReportParameters DROP CONSTRAINT CK_ReportParameters_Type;
+    ALTER TABLE dbo.ReportParameters ADD CONSTRAINT CK_ReportParameters_Type
+        CHECK (Type IN (N'Text', N'Number', N'Date', N'PersianDate', N'Checkbox', N'RadioButton', N'ListBox', N'ComboBox'));
+END;
+GO
+
 /* Seeded parameter types */
 IF OBJECT_ID(N'dbo.ParameterTypes', N'U') IS NULL
 BEGIN
