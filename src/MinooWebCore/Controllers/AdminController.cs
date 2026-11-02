@@ -490,7 +490,7 @@ public sealed class AdminController : Controller
         public string CalendarType { get; set; } = "Gregorian";
         public string DateFormat { get; set; } = "yyyy-MM-dd";
         public string TimeFormat { get; set; } = "HH:mm:ss";
-        public string DateTimeSeparator { get; set; } = " ";
+        public string? DateTimeSeparator { get; set; }
     }
 
     private static string? ValidateExcelFile(IFormFile file)
