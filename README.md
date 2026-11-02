@@ -27,6 +27,20 @@ Open the HTTPS/HTTP URL printed in the console.
 
 **Important:** This is only a starter/demo authentication provider. Do not deploy it as-is. Replace `DemoAuthenticationService` with your real API/database authentication and remove the demo credentials before deployment. In production, use HTTPS, a proper secret store, and review cookie settings for your environment.
 
+## MinooWebReports single sign-on
+
+The parent portal issues a short-lived, one-time ticket when an authenticated user opens either Reports application. MinooWebReports redeems that ticket through `POST /api/sso/reports/redeem` using the shared `X-Reports-Client-Secret` header, then creates its own secure authentication cookie.
+
+Configure the following on the MinooWebCore deployment:
+
+```text
+Sso__Reports__BaseUrl=https://<minoo-webreports-host>/
+Sso__Reports__ClientSecret=<shared-high-entropy-secret>
+Sso__TicketLifetimeSeconds=60
+```
+
+Set the same secret in MinooWebReports as `Sso__Parent__ClientSecret`. Do not commit the secret to source control. Both applications and the redemption endpoint must use HTTPS. The user login identifier is the string `Users.UserCode`; it is preserved as a string across the SSO boundary.
+
 ## Logo assets
 The orbital marks currently show company names as text labels, not fabricated official logos. Put verified logo files under `wwwroot/images/logos/` and replace the text badges in `Views/Account/Login.cshtml` with `<img>` tags. The project is designed to work without external image/CDN requests.
 
