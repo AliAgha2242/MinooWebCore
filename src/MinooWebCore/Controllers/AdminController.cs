@@ -373,7 +373,7 @@ public sealed class AdminController : Controller
         if (input.Parameters.Count > 30)
             ModelState.AddModelError(nameof(input.Parameters), "حداکثر ۳۰ پارامتر برای هر گزارش مجاز است.");
 
-        var allowedParameterTypes = new HashSet<string>(new[] { "Text", "Number", "Date", "PersianDate", "Checkbox", "RadioButton", "ListBox", "ComboBox" }, StringComparer.Ordinal);
+        var allowedParameterTypes = new HashSet<string>(new[] { "Text", "Number", "Date", "Time", "DateTime", "Checkbox", "RadioButton", "ListBox", "ComboBox" }, StringComparer.Ordinal);
         var parameterNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         for (var index = 0; index < input.Parameters.Count; index++)
         {
@@ -394,6 +394,15 @@ public sealed class AdminController : Controller
 
             if (!allowedParameterTypes.Contains(parameter.Type))
                 ModelState.AddModelError($"{prefix}.Type", "نوع پارامتر معتبر نیست.");
+
+            if (parameter.Type is "Date" or "DateTime")
+            {
+                if (parameter.CalendarType is not ("Persian" or "Gregorian")) ModelState.AddModelError($"{prefix}.CalendarType", "تقویم تاریخ معتبر نیست.");
+                if (parameter.DateFormat is not ("yyyyMMdd" or "yyyy/MM/dd" or "yyyy-MM-dd")) ModelState.AddModelError($"{prefix}.DateFormat", "فرمت تاریخ معتبر نیست.");
+            }
+            if (parameter.Type is "Time" or "DateTime")
+                if (parameter.TimeFormat is not ("HH:mm" or "HH:mm:ss")) ModelState.AddModelError($"{prefix}.TimeFormat", "فرمت ساعت معتبر نیست.");
+            if (parameter.Type == "DateTime" && parameter.DateTimeSeparator is not (" " or "T")) ModelState.AddModelError($"{prefix}.DateTimeSeparator", "جداکننده تاریخ و ساعت معتبر نیست.");
 
             if (parameter.Type is "ListBox" or "ComboBox")
             {
@@ -434,7 +443,11 @@ public sealed class AdminController : Controller
                 Name = item.Name.Trim(),
                 DisplayName = item.DisplayName.Trim(),
                 Type = item.Type,
-                ParameterTypeId = item.Type switch { "Text" => 1, "Number" => 2, "Date" => 3, "PersianDate" => 4, "ListBox" => 5, "RadioButton" => 6, "ComboBox" => 7, "Checkbox" => 8, _ => 1 },
+                ParameterTypeId = item.Type switch { "Text" => 1, "Number" => 2, "Date" => 3, "ListBox" => 5, "RadioButton" => 6, "ComboBox" => 7, "Checkbox" => 8, "Time" => 9, "DateTime" => 10, _ => 1 },
+                CalendarType = item.Type is "Date" or "DateTime" ? item.CalendarType : null,
+                DateFormat = item.Type is "Date" or "DateTime" ? item.DateFormat : null,
+                TimeFormat = item.Type is "Time" or "DateTime" ? item.TimeFormat : null,
+                DateTimeSeparator = item.Type == "DateTime" ? item.DateTimeSeparator : null,
                 DataSource = item.Type is "ListBox" or "ComboBox" ? item.DataSource?.Trim() : null,
                 DisplayNameField = item.Type is "ListBox" or "ComboBox" ? item.DisplayNameField?.Trim() : null,
                 ValueField = item.Type is "ListBox" or "ComboBox" ? item.ValueField?.Trim() : null,
@@ -474,6 +487,10 @@ public sealed class AdminController : Controller
         public string? DisplayNameField { get; set; }
         public string? ValueField { get; set; }
         public string? Options { get; set; }
+        public string CalendarType { get; set; } = "Gregorian";
+        public string DateFormat { get; set; } = "yyyy-MM-dd";
+        public string TimeFormat { get; set; } = "HH:mm:ss";
+        public string DateTimeSeparator { get; set; } = " ";
     }
 
     private static string? ValidateExcelFile(IFormFile file)
