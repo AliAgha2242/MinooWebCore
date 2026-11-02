@@ -21,6 +21,14 @@ public sealed class RedisService : IRedisService
             : JsonSerializer.Deserialize<T>((string)value!, JsonOptions);
     }
 
+    public async Task<T?> GetAndDeleteAsync<T>(string key)
+    {
+        var value = await _database.StringGetDeleteAsync(key);
+        return value.IsNullOrEmpty
+            ? default
+            : JsonSerializer.Deserialize<T>((string)value!, JsonOptions);
+    }
+
     public Task SetAsync<T>(string key, T value, TimeSpan? expiry = null) =>
         _database.StringSetAsync(key, JsonSerializer.Serialize(value, JsonOptions), expiry);
 
