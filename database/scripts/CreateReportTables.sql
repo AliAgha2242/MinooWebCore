@@ -56,7 +56,7 @@ BEGIN
         CONSTRAINT FK_ReportParameters_ReportDefinitions
             FOREIGN KEY (ReportDefinitionId) REFERENCES dbo.ReportDefinitions(Id) ON DELETE CASCADE,
         CONSTRAINT CK_ReportParameters_Type
-            CHECK (Type IN (N'Text', N'Number', N'Date', N'Checkbox', N'RadioButton', N'ListBox'))
+            CHECK (Type IN (N'Text', N'Number', N'Date', N'PersianDate', N'Checkbox', N'RadioButton', N'ListBox', N'ComboBox'))
     );
 END;
 GO
@@ -153,4 +153,50 @@ GO
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_ReportDefinitions_SoftwareGroupId_ReportLevelId' AND object_id = OBJECT_ID(N'dbo.ReportDefinitions'))
     CREATE INDEX IX_ReportDefinitions_SoftwareGroupId_ReportLevelId
         ON dbo.ReportDefinitions(SoftwareGroupId, ReportLevelId);
+GO
+
+/* Seeded parameter types */
+IF OBJECT_ID(N'dbo.ParameterTypes', N'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.ParameterTypes
+    (
+        Id INT NOT NULL CONSTRAINT PK_ParameterTypes PRIMARY KEY,
+        Code NVARCHAR(30) NOT NULL,
+        Title NVARCHAR(100) NOT NULL,
+        RequiresDataSource BIT NOT NULL CONSTRAINT DF_ParameterTypes_RequiresDataSource DEFAULT (0),
+        RequiresOptions BIT NOT NULL CONSTRAINT DF_ParameterTypes_RequiresOptions DEFAULT (0),
+        IsActive BIT NOT NULL CONSTRAINT DF_ParameterTypes_IsActive DEFAULT (1)
+    );
+    CREATE UNIQUE INDEX UX_ParameterTypes_Code ON dbo.ParameterTypes(Code);
+END;
+GO
+INSERT INTO dbo.ParameterTypes (Id, Code, Title, RequiresDataSource, RequiresOptions, IsActive)
+SELECT seed.Id, seed.Code, seed.Title, seed.RequiresDataSource, seed.RequiresOptions, 1
+FROM (VALUES
+    (1, N'Text', N'متن', 0, 0),
+    (2, N'Number', N'عدد', 0, 0),
+    (3, N'Date', N'تاریخ', 0, 0),
+    (4, N'PersianDate', N'تاریخ شمسی (۱۴۰۵۰۱۰۱)', 0, 0),
+    (5, N'ListBox', N'لیست‌باکس', 1, 0),
+    (6, N'RadioButton', N'رادیوباتن', 0, 1),
+    (7, N'ComboBox', N'کمبوباکس تک‌مقداره', 1, 0),
+    (8, N'Checkbox', N'چک‌باکس', 0, 0)
+) AS seed(Id, Code, Title, RequiresDataSource, RequiresOptions)
+WHERE NOT EXISTS (SELECT 1 FROM dbo.ParameterTypes existing WHERE existing.Id = seed.Id);
+GO
+IF COL_LENGTH(N'dbo.ReportParameters', N'ParameterTypeId') IS NULL
+    ALTER TABLE dbo.ReportParameters ADD ParameterTypeId INT NULL;
+GO
+UPDATE p SET ParameterTypeId = t.Id
+FROM dbo.ReportParameters p
+JOIN dbo.ParameterTypes t ON t.Code = p.Type
+WHERE p.ParameterTypeId IS NULL;
+GO
+UPDATE dbo.ReportParameters SET ParameterTypeId = 1 WHERE ParameterTypeId IS NULL;
+GO
+IF EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID(N'dbo.ReportParameters') AND name = N'ParameterTypeId' AND is_nullable = 1)
+    ALTER TABLE dbo.ReportParameters ALTER COLUMN ParameterTypeId INT NOT NULL;
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = N'FK_ReportParameters_ParameterTypes')
+    ALTER TABLE dbo.ReportParameters ADD CONSTRAINT FK_ReportParameters_ParameterTypes FOREIGN KEY (ParameterTypeId) REFERENCES dbo.ParameterTypes(Id);
 GO
