@@ -16,6 +16,7 @@ builder.Services.infrasreg(builder.Configuration);
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<IUsersService, UsersService>();
 builder.Services.AddScoped<IAuthenticateService, AuthenticateService>();
+builder.Services.AddScoped<IReportsSsoTicketService, ReportsSsoTicketService>();
 builder.Services.AddWcfClient();
 builder.Services.AddSingleton<IMinooConfiguration>(_ => new MinooConfiguration());
 builder.Services.AddSingleton<IConnectionMultiplexer>(_ =>
