@@ -84,11 +84,12 @@ public sealed class MinooDbContext(DbContextOptions<MinooDbContext> options) : D
                 new ParameterType { Id = 1, Code = "Text", Title = "متن", IsActive = true },
                 new ParameterType { Id = 2, Code = "Number", Title = "عدد", IsActive = true },
                 new ParameterType { Id = 3, Code = "Date", Title = "تاریخ", IsActive = true },
-                new ParameterType { Id = 4, Code = "PersianDate", Title = "تاریخ شمسی (۱۴۰۵۰۱۰۱)", IsActive = true },
                 new ParameterType { Id = 5, Code = "ListBox", Title = "لیست‌باکس", RequiresDataSource = true, IsActive = true },
                 new ParameterType { Id = 6, Code = "RadioButton", Title = "رادیوباتن", RequiresOptions = true, IsActive = true },
                 new ParameterType { Id = 7, Code = "ComboBox", Title = "کمبوباکس تک‌مقداره", RequiresDataSource = true, IsActive = true },
-                new ParameterType { Id = 8, Code = "Checkbox", Title = "چک‌باکس", IsActive = true });
+                new ParameterType { Id = 8, Code = "Checkbox", Title = "چک‌باکس", IsActive = true },
+                new ParameterType { Id = 9, Code = "Time", Title = "ساعت", IsActive = true },
+                new ParameterType { Id = 10, Code = "DateTime", Title = "تاریخ و ساعت", IsActive = true });
         });
 
         modelBuilder.Entity<ReportParameterDefinition>(entity =>
@@ -98,6 +99,10 @@ public sealed class MinooDbContext(DbContextOptions<MinooDbContext> options) : D
             entity.Property(x => x.Name).HasMaxLength(100).IsRequired();
             entity.Property(x => x.DisplayName).HasMaxLength(200).IsRequired();
             entity.Property(x => x.Type).HasMaxLength(30).IsRequired();
+            entity.Property(x => x.CalendarType).HasMaxLength(20);
+            entity.Property(x => x.DateFormat).HasMaxLength(20);
+            entity.Property(x => x.TimeFormat).HasMaxLength(20);
+            entity.Property(x => x.DateTimeSeparator).HasMaxLength(5);
             entity.HasOne(x => x.ParameterType).WithMany(x => x.Parameters).HasForeignKey(x => x.ParameterTypeId).OnDelete(DeleteBehavior.Restrict);
             entity.Property(x => x.DisplayNameField).HasMaxLength(128);
             entity.Property(x => x.ValueField).HasMaxLength(128);
