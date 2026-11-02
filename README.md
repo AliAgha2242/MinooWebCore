@@ -9,7 +9,7 @@ Starter solution for a modern ASP.NET Core MVC login experience targeting .NET 1
 - Login form validation and show/hide password
 - Forgot-password button wired to a placeholder endpoint
 - Responsive industrial-inspired design and animated orbit of subsidiary name badges
-- Demo authentication service that can later be replaced with an API or database-backed implementation
+- Database-backed login using the string `Users.UserCode` identity
 
 ## Run
 Requires the .NET 10 SDK.
@@ -21,11 +21,9 @@ dotnet run --project src/MinooWebCore/MinooWebCore.csproj
 
 Open the HTTPS/HTTP URL printed in the console.
 
-## Demo credentials
-- Username: `admin`
-- Password: `Minoo@123`
+## Authentication
 
-**Important:** This is only a starter/demo authentication provider. Do not deploy it as-is. Replace `DemoAuthenticationService` with your real API/database authentication and remove the demo credentials before deployment. In production, use HTTPS, a proper secret store, and review cookie settings for your environment.
+The login form validates the supplied username against `Users.UserCode` without numeric conversion, preserving leading zeroes. Password validation continues through the existing password decryption service. Keep database credentials and encryption configuration in a secret store or environment variables.
 
 ## MinooWebReports single sign-on
 
