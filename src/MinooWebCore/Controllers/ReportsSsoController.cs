@@ -23,7 +23,7 @@ public sealed class ReportsSsoController(
         [FromHeader(Name = "X-Reports-Client-Secret")] string? suppliedSecret,
         CancellationToken cancellationToken)
     {
-        Response.Headers.CacheControl = "no-store, no-cache";
+        Response.Headers["Cache-Control"] = "no-store, no-cache";
         Response.Headers["Referrer-Policy"] = "no-referrer";
 
         var expectedSecret = configuration["Sso:Reports:ClientSecret"];
