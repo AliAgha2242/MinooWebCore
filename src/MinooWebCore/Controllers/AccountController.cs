@@ -111,7 +111,7 @@ public sealed class AccountController : Controller
 
         ViewBag.ReportsConsumeUrl = new Uri(baseUri.AbsoluteUri.TrimEnd('/') + "/sso/consume").ToString();
         ViewBag.SsoTicket = ticket;
-        Response.Headers.CacheControl = "no-store, no-cache";
+        Response.Headers["Cache-Control"] = "no-store, no-cache";
         Response.Headers["Referrer-Policy"] = "no-referrer";
         Response.Headers["X-Robots-Tag"] = "noindex, nofollow";
         return View();
