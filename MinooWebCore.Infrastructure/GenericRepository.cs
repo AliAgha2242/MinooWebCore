@@ -14,10 +14,23 @@ public sealed class GenericRepository<TEntity>(MinooDbContext context) : IGeneri
     public Task<List<TEntity>> GetAllAsync(CancellationToken cancellationToken = default) =>
         _dbSet.AsNoTracking().ToListAsync(cancellationToken);
 
-    public Task<List<TEntity>> FindAsync(
+    public async Task<List<TEntity?>?> FindAsync(
         Expression<Func<TEntity, bool>> predicate,
-        CancellationToken cancellationToken = default) =>
-        _dbSet.AsNoTracking().Where(predicate).ToListAsync(cancellationToken);
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            return await _dbSet
+                .AsNoTracking()
+                .Where(predicate)
+                .ToListAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+
+            throw;
+        }
+    }
 
     public Task AddAsync(TEntity entity, CancellationToken cancellationToken = default) =>
         _dbSet.AddAsync(entity, cancellationToken).AsTask();

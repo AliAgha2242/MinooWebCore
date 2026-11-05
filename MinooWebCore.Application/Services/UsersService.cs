@@ -33,11 +33,19 @@ public sealed class UsersService : IUsersService
 
     public async Task<UserModel?> GetByUsernameAsync(string UserID, CancellationToken cancellationToken = default)
     {
+        List<UserModel?>? users;
         if (string.IsNullOrWhiteSpace(UserID))
             return null;
+        try
+        {
+            users = await _repository.FindAsync(x => x.UserId.ToString() == UserID, cancellationToken);
+        }
+        catch (Exception ex)
+        {
 
+            throw;
+        }
         // Login name is Users.UserCode (string), not the numeric UserId column.
-        var users = await _repository.FindAsync(x => x.UserCode == UserID, cancellationToken);
         var user = users.FirstOrDefault();
         if (user is not null)
         {

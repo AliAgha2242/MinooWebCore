@@ -21,7 +21,7 @@ public sealed class AuthenticateService : IAuthenticateService
             return null;
 
         return string.Equals(user.UserPassword, password, StringComparison.Ordinal)
-            ? new AuthenticatedUser(user.UserId, user.UserCode, user.UserName)
+            ? new AuthenticatedUser((int)user.UserId, user.UserCode, user.UserName)
             : null;
     }
 }

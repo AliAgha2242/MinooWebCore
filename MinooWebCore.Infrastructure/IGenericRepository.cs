@@ -7,7 +7,7 @@ public interface IGenericRepository<TEntity> where TEntity : class
 {
     Task<TEntity?> GetByIdAsync(params object[] keyValues);
     Task<List<TEntity>> GetAllAsync(CancellationToken cancellationToken = default);
-    Task<List<TEntity>> FindAsync(
+    Task<List<TEntity?>?> FindAsync(
         Expression<Func<TEntity, bool>> predicate,
         CancellationToken cancellationToken = default);
     Task AddAsync(TEntity entity, CancellationToken cancellationToken = default);
