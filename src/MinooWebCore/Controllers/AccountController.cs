@@ -63,6 +63,7 @@ public sealed class AccountController : Controller
             new("UserCode", authenticatedUser.UserCode),
             new(ClaimTypes.Role, "User")
         };
+        
 
         var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
         var principal = new ClaimsPrincipal(identity);
