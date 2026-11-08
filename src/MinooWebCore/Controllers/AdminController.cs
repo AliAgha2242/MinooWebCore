@@ -314,19 +314,28 @@ public sealed class AdminController : Controller
             _parameterRepository.Remove(parameter);
 
         var oldServerTargets = await _reportServerRepository.FindAsync(
-            x => x.ReportDefinitionId == report.Id, cancellationToken);
-        foreach (var target in oldServerTargets ?? [])
-            if (target is not null)
-                _reportServerRepository.Remove(target);
+            x => x.ReportDefinitionId == report.Id, cancellationToken) ?? [];
+        var requestedServerIds = input.UseDefaultServer
+            ? new HashSet<decimal>()
+            : input.SelectedServerVahedeTejariSNs.ToHashSet();
+        var existingServerIds = oldServerTargets
+            .Where(target => target is not null)
+            .Select(target => target!.VahedeTejariSN)
+            .ToHashSet();
 
-        if (!input.UseDefaultServer)
+        foreach (var target in oldServerTargets)
         {
-            foreach (var serverId in input.SelectedServerVahedeTejariSNs.Distinct())
-                await _reportServerRepository.AddAsync(new ReportDefinitionServer
-                {
-                    ReportDefinitionId = report.Id,
-                    VahedeTejariSN = serverId
-                }, cancellationToken);
+            if (target is not null && !requestedServerIds.Contains(target.VahedeTejariSN))
+                _reportServerRepository.Remove(target);
+        }
+
+        foreach (var serverId in requestedServerIds.Where(id => !existingServerIds.Contains(id)))
+        {
+            await _reportServerRepository.AddAsync(new ReportDefinitionServer
+            {
+                ReportDefinitionId = report.Id,
+                VahedeTejariSN = serverId
+            }, cancellationToken);
         }
 
         AddParameterEntities(report, input.Parameters);
