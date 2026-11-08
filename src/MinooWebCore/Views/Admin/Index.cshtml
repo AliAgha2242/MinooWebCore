@@ -13,6 +13,7 @@
     var softwareGroups = ViewBag.SoftwareGroups as List<SoftwareGroup> ?? [];
     var reportLevels = ViewBag.ReportLevels as List<ReportLevel> ?? [];
     var availableServers = ViewBag.AvailableServers as List<ServerInfo> ?? [];
+    var selectedServerIds = (Model.SelectedServerVahedeTejariSNs ?? []).ToHashSet();
 }
 <main class="admin-page">
     <aside class="admin-sidebar">
@@ -127,24 +128,27 @@
                             <span asp-validation-for="ReportLevelId" class="report-field-error"></span>
                         </div>
                     </div>
-                    <div class="report-server-option">
-                        <label class="report-checkbox">
-                            <input asp-for="UseSpecificServer" id="useSpecificServer" type="checkbox" />
-                            <span class="report-checkbox-mark"></span>
-                            <span class="report-checkbox-copy"><strong>این گزارش فقط از یک سرور مشخص خوانده شود</strong><small>در صورت فعال‌سازی، سرور موردنظر را انتخاب کنید.</small></span>
-                        </label>
-                        <div class="report-field report-server-select" id="specificServerField" hidden>
-                            <label asp-for="SpecificServerVahedeTejariSN">سرور موردنظر</label>
-                            <select asp-for="SpecificServerVahedeTejariSN" id="specificServerSelect">
-                                <option value="">انتخاب سرور</option>
+                    <div class="report-server-option" id="reportServerOptions">
+                        <div class="report-server-mode">
+                            <label><input type="radio" name="UseDefaultServer" value="true" checked="@Model.UseDefaultServer" /> سرور پیش‌فرض کاربر</label>
+                            <label><input type="radio" name="UseDefaultServer" value="false" checked="@(!Model.UseDefaultServer)" /> چند سرور انتخابی</label>
+                        </div>
+                        <div class="report-field report-server-select" id="multiServerField" hidden>
+                            <strong>سرورهای موردنظر را انتخاب کنید</strong>
+                            <div class="report-server-list">
                                 @foreach (var server in availableServers)
                                 {
-                                    <option value="@server.VahedeTejariSN.ToString(System.Globalization.CultureInfo.InvariantCulture)">@server.ServerName · @server.DatabaseName · @server.VahedeTejariSN</option>
+                                    <label class="report-server-choice">
+                                        <input type="checkbox" name="SelectedServerVahedeTejariSNs"
+                                               value="@server.VahedeTejariSN.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                                               checked="@selectedServerIds.Contains(server.VahedeTejariSN)" />
+                                        <span><strong>@server.ServerName</strong><small>@server.DatabaseName · @server.VahedeTejariSN</small></span>
+                                    </label>
                                 }
-                            </select>
-                            <span asp-validation-for="SpecificServerVahedeTejariSN" class="report-field-error"></span>
+                            </div>
+                            <span asp-validation-for="SelectedServerVahedeTejariSNs" class="report-field-error"></span>
                         </div>
-                        <p class="report-server-hint"><span>ⓘ</span> اگر سروری انتخاب نکنید، گزارش از سرور پیش‌فرض کاربر استفاده می‌کند.</p>
+                        <p class="report-server-hint"><span>ⓘ</span> در حالت چندسروره، نتیجه Query از تمام سرورهای انتخاب‌شده دریافت و یکپارچه می‌شود.</p>
                         @if (ViewBag.ServerConfigurationError is string serverError)
                         {
                             <p class="report-field-error">@serverError</p>
@@ -230,9 +234,9 @@
             const sqlOptions = document.getElementById('sqlOptions');
             const sqlQuery = document.getElementById('sqlQuery');
             const pagination = document.getElementById('needsPagination');
-            const useSpecificServer = document.getElementById('useSpecificServer');
-            const specificServerField = document.getElementById('specificServerField');
-            const specificServerSelect = document.getElementById('specificServerSelect');
+            const reportServerOptions = document.getElementById('reportServerOptions');
+            const multiServerField = document.getElementById('multiServerField');
+            const serverModeInputs = document.querySelectorAll('input[name="UseDefaultServer"]');
             const pageSizeField = document.getElementById('pageSizeField');
             const pageSizeInput = pageSizeField.querySelector('input');
             const parameterList = document.getElementById('parameterList');
@@ -245,13 +249,18 @@
                 sqlOptions.hidden = isExcel;
                 excelFile.required = isExcel && !(isEdit && hasExistingExcel);
                 sqlQuery.required = !isExcel;
+                reportServerOptions.hidden = isExcel;
                 if (!isExcel) excelFile.value = '';
+                updateServerSelection();
             }
 
-            function updateSpecificServer() {
-                specificServerField.hidden = !useSpecificServer.checked;
-                specificServerSelect.required = useSpecificServer.checked;
-                if (!useSpecificServer.checked) specificServerSelect.value = '';
+            function updateServerSelection() {
+                const useDefault = document.querySelector('input[name="UseDefaultServer"]:checked')?.value !== 'false';
+                const disabled = useDefault || source.value === 'Excel';
+                multiServerField.hidden = disabled;
+                multiServerField.querySelectorAll('input[type="checkbox"]').forEach(input => {
+                    input.disabled = disabled;
+                });
             }
 
             function updatePagination() {
@@ -366,10 +375,10 @@
             });
             source.addEventListener('change', updateSourceFields);
             pagination.addEventListener('change', updatePagination);
-            useSpecificServer.addEventListener('change', updateSpecificServer);
+            serverModeInputs.forEach(input => input.addEventListener('change', updateServerSelection));
             updateSourceFields();
             updatePagination();
-            updateSpecificServer();
+            updateServerSelection();
 
             const existingParameters = @Html.Raw(savedParameters);
             existingParameters.forEach(parameter => addParameter({
