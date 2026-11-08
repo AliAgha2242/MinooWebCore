@@ -10,6 +10,7 @@ public sealed class MinooDbContext(DbContextOptions<MinooDbContext> options) : D
 {
     public DbSet<UserModel> Users => Set<UserModel>();
     public DbSet<ReportDefinition> ReportDefinitions => Set<ReportDefinition>();
+    public DbSet<ReportDefinitionServer> ReportDefinitionServers => Set<ReportDefinitionServer>();
     public DbSet<ReportParameterDefinition> ReportParameters => Set<ReportParameterDefinition>();
     public DbSet<SoftwareGroup> SoftwareGroups => Set<SoftwareGroup>();
     public DbSet<ReportLevel> ReportLevels => Set<ReportLevel>();
@@ -35,6 +36,10 @@ public sealed class MinooDbContext(DbContextOptions<MinooDbContext> options) : D
             entity.Property(x => x.ExcelFileName).HasMaxLength(260);
             entity.Property(x => x.ExcelContent).HasColumnType("varbinary(max)");
             entity.Property(x => x.SpecificServerVahedeTejariSN).HasPrecision(18, 3);
+            entity.HasMany(x => x.ServerTargets)
+                .WithOne(x => x.Report)
+                .HasForeignKey(x => x.ReportDefinitionId)
+                .OnDelete(DeleteBehavior.Cascade);
             entity.HasOne(x => x.SoftwareGroup).WithMany(x => x.Reports).HasForeignKey(x => x.SoftwareGroupId).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne(x => x.ReportLevel).WithMany(x => x.Reports).HasForeignKey(x => x.ReportLevelId).OnDelete(DeleteBehavior.Restrict);
             entity.HasQueryFilter(x => !x.IsDeleted);
@@ -48,6 +53,14 @@ public sealed class MinooDbContext(DbContextOptions<MinooDbContext> options) : D
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
+
+        modelBuilder.Entity<ReportDefinitionServer>(entity =>
+        {
+            entity.ToTable("ReportDefinitionServers");
+            entity.HasKey(x => new { x.ReportDefinitionId, x.VahedeTejariSN });
+            entity.Property(x => x.VahedeTejariSN).HasPrecision(18, 3);
+            entity.HasIndex(x => x.VahedeTejariSN).HasDatabaseName("IX_ReportDefinitionServers_VahedeTejariSN");
+        });
 
         modelBuilder.Entity<SoftwareGroup>(entity =>
         {
