@@ -212,6 +212,15 @@
 /* Report classification and server targeting */
 .report-metadata-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 18px; }
 .report-server-option { display: grid; gap: 13px; padding: 17px 18px; border: 1px solid rgba(105,178,208,.15); border-radius: 12px; background: rgba(4,19,33,.32); }
+.report-server-mode { display: flex; flex-wrap: wrap; gap: 18px; }
+.report-server-mode label { display: inline-flex; align-items: center; gap: 8px; color: #d8e7f0; font-size: 12px; cursor: pointer; }
+.report-server-mode input { accent-color: #69d7d7; }
+.report-server-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 8px; margin-top: 12px; }
+.report-server-choice { display: flex; align-items: center; gap: 10px; min-width: 0; padding: 10px 12px; border: 1px solid rgba(105,178,208,.16); border-radius: 9px; background: rgba(7,29,45,.48); cursor: pointer; }
+.report-server-choice input { flex: 0 0 auto; accent-color: #69d7d7; }
+.report-server-choice span { display: grid; min-width: 0; gap: 3px; }
+.report-server-choice strong { overflow: hidden; color: #e4f0f5; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.report-server-choice small { color: #81a4ba; font-size: 10px; direction: ltr; text-align: right; }
 .report-server-select { max-width: 560px; padding-right: 30px; }
 .report-server-select[hidden] { display: none !important; }
 .report-server-hint { display: flex; align-items: flex-start; gap: 8px; margin: 0; color: #81a4ba; font-size: 10px; line-height: 1.9; }
