@@ -26,6 +26,7 @@ public sealed class AdminController : Controller
     private readonly IGenericRepository<ReportParameterDefinition> _parameterRepository;
     private readonly IGenericRepository<SoftwareGroup> _softwareGroupRepository;
     private readonly IGenericRepository<ReportLevel> _reportLevelRepository;
+    private readonly IGenericRepository<ReportDefinitionServer> _reportServerRepository;
     private readonly IMinooConfiguration _minooConfiguration;
 
     public AdminController(
@@ -33,12 +34,14 @@ public sealed class AdminController : Controller
         IGenericRepository<ReportParameterDefinition> parameterRepository,
         IGenericRepository<SoftwareGroup> softwareGroupRepository,
         IGenericRepository<ReportLevel> reportLevelRepository,
+        IGenericRepository<ReportDefinitionServer> reportServerRepository,
         IMinooConfiguration minooConfiguration)
     {
         _reportRepository = reportRepository;
         _parameterRepository = parameterRepository;
         _softwareGroupRepository = softwareGroupRepository;
         _reportLevelRepository = reportLevelRepository;
+        _reportServerRepository = reportServerRepository;
         _minooConfiguration = minooConfiguration;
     }
 
@@ -74,25 +77,36 @@ public sealed class AdminController : Controller
         if (levels.Count == 0)
             ModelState.AddModelError(nameof(input.ReportLevelId), "سطح گزارش معتبر را انتخاب کنید.");
 
-        if (!input.UseSpecificServer)
+        input.SelectedServerVahedeTejariSNs ??= [];
+        if (!string.Equals(input.Source, "Sql", StringComparison.OrdinalIgnoreCase) || input.UseDefaultServer)
         {
-            input.SpecificServerVahedeTejariSN = null;
-        }
-        else if (!input.SpecificServerVahedeTejariSN.HasValue)
-        {
-            ModelState.AddModelError(nameof(input.SpecificServerVahedeTejariSN), "برای استفاده از سرور اختصاصی، یک سرور انتخاب کنید.");
+            input.UseDefaultServer = true;
+            input.SelectedServerVahedeTejariSNs.Clear();
         }
         else
         {
-            try
+            input.SelectedServerVahedeTejariSNs = input.SelectedServerVahedeTejariSNs
+                .Distinct()
+                .ToList();
+
+            if (input.SelectedServerVahedeTejariSNs.Count == 0)
             {
-                var servers = _minooConfiguration.GetAllSerevr();
-                if (!servers.Any(x => x.VahedeTejariSN == input.SpecificServerVahedeTejariSN.Value))
-                    ModelState.AddModelError(nameof(input.SpecificServerVahedeTejariSN), "سرور انتخاب‌شده در فهرست سرورهای سامانه وجود ندارد.");
+                ModelState.AddModelError(nameof(input.SelectedServerVahedeTejariSNs), "برای اجرای چندسروره، حداقل یک سرور انتخاب کنید.");
             }
-            catch
+            else
             {
-                ModelState.AddModelError(nameof(input.SpecificServerVahedeTejariSN), "فهرست سرورها در دسترس نیست؛ لطفاً تنظیمات سرورها را بررسی کنید.");
+                try
+                {
+                    var configuredServerIds = _minooConfiguration.GetAllSerevr()
+                        .Select(x => x.VahedeTejariSN)
+                        .ToHashSet();
+                    if (input.SelectedServerVahedeTejariSNs.Any(id => !configuredServerIds.Contains(id)))
+                        ModelState.AddModelError(nameof(input.SelectedServerVahedeTejariSNs), "یک یا چند سرور انتخاب‌شده در تنظیمات سامانه وجود ندارد.");
+                }
+                catch
+                {
+                    ModelState.AddModelError(nameof(input.SelectedServerVahedeTejariSNs), "فهرست سرورها در دسترس نیست؛ لطفاً تنظیمات سرورها را بررسی کنید.");
+                }
             }
         }
 
@@ -130,13 +144,30 @@ public sealed class AdminController : Controller
             .ToDictionary(x => x.Id, x => x.Name);
         try
         {
-            ViewBag.ServerNames = _minooConfiguration.GetAllSerevr()
+            var serverLookup = _minooConfiguration.GetAllSerevr()
                 .GroupBy(x => x.VahedeTejariSN)
                 .ToDictionary(x => x.Key, x => x.First().ServerName + " · " + x.First().DatabaseName);
+            ViewBag.ServerNames = serverLookup;
+
+            var reportIds = reports.Select(x => x.Id).ToArray();
+            var targets = reportIds.Length == 0
+                ? new List<ReportDefinitionServer?>()
+                : await _reportServerRepository.FindAsync(x => reportIds.Contains(x.ReportDefinitionId), cancellationToken)
+                    ?? new List<ReportDefinitionServer?>();
+            ViewBag.ReportServerNames = targets
+                .Where(x => x is not null)
+                .GroupBy(x => x!.ReportDefinitionId)
+                .ToDictionary(
+                    group => group.Key,
+                    group => string.Join("، ", group.Select(target =>
+                        serverLookup.TryGetValue(target!.VahedeTejariSN, out var name)
+                            ? name
+                            : target.VahedeTejariSN.ToString(System.Globalization.CultureInfo.InvariantCulture))));
         }
         catch
         {
             ViewBag.ServerNames = new Dictionary<decimal, string>();
+            ViewBag.ReportServerNames = new Dictionary<int, string>();
         }
         return View("Reports", reports.OrderByDescending(x => x.CreatedAtUtc).ToList());
     }
@@ -174,7 +205,8 @@ public sealed class AdminController : Controller
             PageSize = input.NeedsPagination ? input.PageSize : null,
             SoftwareGroupId = input.SoftwareGroupId,
             ReportLevelId = input.ReportLevelId,
-            SpecificServerVahedeTejariSN = input.UseSpecificServer ? input.SpecificServerVahedeTejariSN : null,
+            UseDefaultServer = input.UseDefaultServer,
+            ServerTargets = input.SelectedServerVahedeTejariSNs.Select(id => new ReportDefinitionServer { VahedeTejariSN = id }).ToList(),
             CreatedAtUtc = DateTime.UtcNow
         };
 
@@ -211,8 +243,9 @@ public sealed class AdminController : Controller
             PageSize = report.PageSize,
             SoftwareGroupId = report.SoftwareGroupId,
             ReportLevelId = report.ReportLevelId,
-            UseSpecificServer = report.SpecificServerVahedeTejariSN.HasValue,
-            SpecificServerVahedeTejariSN = report.SpecificServerVahedeTejariSN,
+            UseDefaultServer = report.UseDefaultServer,
+            SelectedServerVahedeTejariSNs = (await _reportServerRepository.FindAsync(x => x.ReportDefinitionId == id, cancellationToken) ?? [])
+                .Where(x => x is not null).Select(x => x!.VahedeTejariSN).ToList(),
             SqlQuery = report.SqlQuery ?? string.Empty,
             ExistingExcelFileName = report.ExcelFileName,
             Parameters = parameters.OrderBy(x => x.SortOrder).Select(x => new ReportParameterInput
@@ -259,7 +292,7 @@ public sealed class AdminController : Controller
         report.PageSize = input.NeedsPagination ? input.PageSize : null;
         report.SoftwareGroupId = input.SoftwareGroupId;
         report.ReportLevelId = input.ReportLevelId;
-        report.SpecificServerVahedeTejariSN = input.UseSpecificServer ? input.SpecificServerVahedeTejariSN : null;
+        report.UseDefaultServer = input.UseDefaultServer;
         report.UpdatedAtUtc = DateTime.UtcNow;
 
         if (input.Source == "Sql")
@@ -279,6 +312,22 @@ public sealed class AdminController : Controller
             x => x.ReportDefinitionId == report.Id, cancellationToken);
         foreach (var parameter in oldParameters)
             _parameterRepository.Remove(parameter);
+
+        var oldServerTargets = await _reportServerRepository.FindAsync(
+            x => x.ReportDefinitionId == report.Id, cancellationToken);
+        foreach (var target in oldServerTargets ?? [])
+            if (target is not null)
+                _reportServerRepository.Remove(target);
+
+        if (!input.UseDefaultServer)
+        {
+            foreach (var serverId in input.SelectedServerVahedeTejariSNs.Distinct())
+                await _reportServerRepository.AddAsync(new ReportDefinitionServer
+                {
+                    ReportDefinitionId = report.Id,
+                    VahedeTejariSN = serverId
+                }, cancellationToken);
+        }
 
         AddParameterEntities(report, input.Parameters);
         _reportRepository.Update(report);
@@ -466,8 +515,8 @@ public sealed class AdminController : Controller
         public int? PageSize { get; set; }
         public int SoftwareGroupId { get; set; }
         public int ReportLevelId { get; set; }
-        public bool UseSpecificServer { get; set; }
-        public decimal? SpecificServerVahedeTejariSN { get; set; }
+        public bool UseDefaultServer { get; set; } = true;
+        public List<decimal> SelectedServerVahedeTejariSNs { get; set; } = [];
         public IFormFile? ExcelFile { get; set; }
         public string ExistingExcelFileName { get; set; } = string.Empty;
         public string SqlQuery { get; set; } = string.Empty;
