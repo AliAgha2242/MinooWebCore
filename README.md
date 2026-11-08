@@ -52,3 +52,12 @@ The button posts to `/Account/ForgotPassword`. The action currently returns a fr
 - `Views/Account/` login and forgot-password views
 - `wwwroot/css/` styling and orbital animation
 - `wwwroot/js/` password visibility behavior
+
+## Report server selection
+
+The report registration form supports two execution modes for SQL reports:
+
+- Default server: the report uses the currently selected server of the user.
+- Multiple servers: the report stores one or more selected VahedeTejariSN values and the Reports application validates that the user is authorized for every configured target before execution.
+
+The database change is in database/scripts/20261108_AddMultiServerReportTargets.sql. Run it against the database containing dbo.ReportDefinitions before deploying. Existing single-server report definitions are migrated to the new server-target table automatically.
