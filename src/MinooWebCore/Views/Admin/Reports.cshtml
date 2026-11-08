@@ -7,7 +7,6 @@
     var selectedDescription = ViewBag.SelectedDescription as string ?? "";
     var softwareGroupNames = ViewBag.SoftwareGroupNames as Dictionary<int, string> ?? [];
     var reportLevelNames = ViewBag.ReportLevelNames as Dictionary<int, string> ?? [];
-    var serverNames = ViewBag.ServerNames as Dictionary<decimal, string> ?? [];
     var reportServerNames = ViewBag.ReportServerNames as Dictionary<int, string> ?? [];
 }
 <main class="admin-page">
@@ -81,7 +80,7 @@
                                 <th>منبع</th>
                                 <th>گروه نرم‌افزاری</th>
                                 <th>سطح</th>
-                                <th>سرور</th>
+                                <th>محل اجرا</th>
                                 <th>صفحه‌بندی</th>
                                 <th>تاریخ ایجاد (UTC)</th>
                                 <th>عملیات</th>
