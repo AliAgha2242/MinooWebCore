@@ -1,3 +1,4 @@
+using Minoo.Logging;
 using MinooWebCore.Application.Services;
 using MinooWebCore.Data;
 using MinooWebCore.Infrastructure;
@@ -10,6 +11,10 @@ using StackExchange.Redis;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Logging.AddProvider(new DailyFileLoggerProvider(
+    Path.Combine(builder.Environment.ContentRootPath, "Logs")));
+builder.Logging.AddFilter("Microsoft.AspNetCore", LogLevel.Information);
 
 builder.Services.AddControllersWithViews();
 builder.Services.infrasreg(builder.Configuration);
@@ -54,6 +59,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseStaticFiles();
 app.UseRouting();
+app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 
