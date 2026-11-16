@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\MinooWebCore.Data\MinooWebCore.Data.csproj" />
+    <ProjectReference Include="..\MinooWebCore.Data\MinooWebCore.Data.csproj" />
   </ItemGroup>
 
 </Project>
