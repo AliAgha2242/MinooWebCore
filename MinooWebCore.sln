@@ -4,7 +4,7 @@ VisualStudioVersion = 18.0.11205.157
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MinooWebCore", "src\MinooWebCore\MinooWebCore.csproj", "{B12F1D8B-9D12-4A54-8B61-6B8C0E43F9C1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MinooWebCore.Data", "src\MinooWebCore.Data\MinooWebCore.Data.csproj", "{3B84B5D4-12CE-4F70-9E11-75D6D9A81B21}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MinooWebCore.Data", "MinooWebCore.Data\MinooWebCore.Data.csproj", "{3B84B5D4-12CE-4F70-9E11-75D6D9A81B21}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MinooWebCore.Infrastructure", "MinooWebCore.Infrastructure\MinooWebCore.Infrastructure.csproj", "{F0A46CF8-8FD5-49C4-AC48-C08692DACB4A}"
 EndProject
