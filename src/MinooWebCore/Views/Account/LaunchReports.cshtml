@@ -1,6 +1,8 @@
+@using  MinooWebCore.Models
+@model SsoModelDto
 @{
     Layout = null;
-    ViewData["Title"] = "ورود به سامانه گزارشات";
+    // ViewData["Title"] = "ورود به سامانه گزارشات";
 }
 <!doctype html>
 <html lang="fa" dir="rtl">
@@ -14,8 +16,8 @@
     <main>
         <h1>در حال ورود به سامانه گزارشات</h1>
         <p>لطفاً چند لحظه صبر کنید...</p>
-        <form id="reports-sso-form" method="post" action="@ViewBag.ReportsConsumeUrl" autocomplete="off">
-            <input type="hidden" name="ticket" value="@ViewBag.SsoTicket" />
+        <form id="reports-sso-form" method="post" action="@Model.ReportsConsumeUrl" autocomplete="off">
+            <input type="hidden" name="ticket" value="@Model.SsoTicket" />
             <button type="submit">ادامه به سامانه گزارشات</button>
         </form>
     </main>

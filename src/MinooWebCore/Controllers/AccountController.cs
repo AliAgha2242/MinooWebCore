@@ -90,6 +90,7 @@ public sealed class AccountController : Controller
     [HttpGet]
     public async Task<IActionResult> LaunchReports(CancellationToken cancellationToken)
     {
+        var ssoModel = new SsoModelDto();
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var userCode = User.FindFirstValue("UserCode");
         var userName = User.Identity?.Name;
@@ -110,12 +111,12 @@ public sealed class AccountController : Controller
         var ticket = await _reportsSso.IssueAsync(
             new ReportsSsoIdentity(userId, userCode, userName), cancellationToken);
 
-        ViewBag.ReportsConsumeUrl = new Uri(baseUri.AbsoluteUri.TrimEnd('/') + "/sso/consume").ToString();
-        ViewBag.SsoTicket = ticket;
+        ssoModel.ReportsConsumeUrl = new Uri(baseUri.AbsoluteUri.TrimEnd('/') + "/sso/consume").ToString();
+        ssoModel.SsoTicket = ticket;
         Response.Headers["Cache-Control"] = "no-store, no-cache";
         Response.Headers["Referrer-Policy"] = "no-referrer";
         Response.Headers["X-Robots-Tag"] = "noindex, nofollow";
-        return View();
+        return View(ssoModel);
     }
 
     [HttpPost]
