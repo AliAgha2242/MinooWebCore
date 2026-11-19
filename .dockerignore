@@ -1,0 +1,13 @@
+**/bin/
+**/obj/
+**/out/
+**/publish/
+.vs/
+.git/
+.gitignore
+**/Logs/
+**/logs/
+**/*.user
+**/*.suo
+.env
+docker/config/*.json
