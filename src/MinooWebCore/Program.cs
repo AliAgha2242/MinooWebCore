@@ -26,7 +26,7 @@ builder.Services.AddWcfClient();
 builder.Services.AddSingleton<IMinooConfiguration>(_ => new MinooConfiguration());
 builder.Services.AddSingleton<IConnectionMultiplexer>(_ =>
     ConnectionMultiplexer.Connect(
-        builder.Configuration["Redis:ConnectionString"] ?? "localhost:6379,abortConnect=false"));
+        builder.Configuration["Redis:ConnectionString"] ?? "172.16.5.39:6379,abortConnect=false"));
 builder.Services.AddSingleton<IRedisService, RedisService>();
 builder.Services.AddAntiforgery(options =>
 {
