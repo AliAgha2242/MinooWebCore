@@ -1,0 +1,28 @@
+services:
+  minoowebcore:
+    container_name: minoowebcore
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: minoowebcore:latest
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_HTTP_PORTS: 8080
+      ConnectionStrings__DefaultConnection: "${MSSQL_CONNECTION_STRING:?Set MSSQL_CONNECTION_STRING in .env}"
+      Redis__ConnectionString: "${REDIS_CONNECTION_STRING:-Rabbit-srv:6379,abortConnect=false}"
+    volumes:
+      # MinooConfiguration loads this file from AppDomain.CurrentDomain.BaseDirectory.
+      - type: bind
+        source: ./docker/config/AppConfig.json
+        target: /app/AppConfig.json
+        read_only: true
+        bind:
+          create_host_path: false
+      # Keep application logs outside the container lifecycle.
+      - minoo_logs:/app/Logs
+
+volumes:
+  minoo_logs:
