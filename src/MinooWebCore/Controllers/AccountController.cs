@@ -107,6 +107,8 @@ public sealed class AccountController : Controller
             return StatusCode(StatusCodes.Status503ServiceUnavailable,
                 "سامانه گزارشات هنوز در تنظیمات درگاه مادر تعریف نشده است.");
         }
+        Console.WriteLine("---------", reportsBaseUrl);
+        Console.WriteLine("---------", userId,userCode,userName);
 
         var ticket = await _reportsSso.IssueAsync(
             new ReportsSsoIdentity(userId, userCode, userName), cancellationToken);
@@ -116,6 +118,9 @@ public sealed class AccountController : Controller
         Response.Headers["Cache-Control"] = "no-store, no-cache";
         Response.Headers["Referrer-Policy"] = "no-referrer";
         Response.Headers["X-Robots-Tag"] = "noindex, nofollow";
+        Console.WriteLine("---------",ssoModel.ReportsConsumeUrl);
+        Console.WriteLine("---------", ssoModel.SsoTicket);
+
         return View(ssoModel);
     }
 
