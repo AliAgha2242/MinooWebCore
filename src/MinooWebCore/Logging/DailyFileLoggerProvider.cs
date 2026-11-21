@@ -68,9 +68,19 @@ public sealed class DailyFileLoggerProvider : ILoggerProvider, ISupportExternalS
                 _writer.Flush();
             }
         }
-        catch
+        catch (Exception loggingException)
         {
-            // Logging must not break the application if the log disk is unavailable.
+            // Do not call ILogger here: this is the logger's fallback path.
+            // Docker captures stderr, so file-system failures remain observable.
+            try
+            {
+                Console.Error.WriteLine(
+                    $"DailyFileLoggerProvider could not write to '{_directory}'. {loggingException}");
+            }
+            catch
+            {
+                // Logging must never bring down the application.
+            }
         }
     }
 
