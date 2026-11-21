@@ -63,7 +63,7 @@ public sealed class AccountController : Controller
             new("UserCode", authenticatedUser.UserCode),
             new(ClaimTypes.Role, "User")
         };
-        
+
 
         var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
         var principal = new ClaimsPrincipal(identity);
@@ -90,37 +90,62 @@ public sealed class AccountController : Controller
     [HttpGet]
     public async Task<IActionResult> LaunchReports(CancellationToken cancellationToken)
     {
-        var ssoModel = new SsoModelDto();
+        _logger.LogInformation("LaunchReports started.");
+
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var userCode = User.FindFirstValue("UserCode");
         var userName = User.Identity?.Name;
         var reportsBaseUrl = _configuration["Sso:Reports:BaseUrl"];
 
-        if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(userCode) ||
+        if (string.IsNullOrWhiteSpace(userId) ||
+            string.IsNullOrWhiteSpace(userCode) ||
             string.IsNullOrWhiteSpace(userName))
+        {
+            _logger.LogWarning("LaunchReports rejected because required user claims are missing.");
             return Forbid();
+        }
 
         if (!Uri.TryCreate(reportsBaseUrl, UriKind.Absolute, out var baseUri) ||
             (baseUri.Scheme != Uri.UriSchemeHttp && baseUri.Scheme != Uri.UriSchemeHttps))
         {
-            _logger.LogError("The Reports base URL must be an absolute HTTP or HTTPS URL.");
+            _logger.LogError("LaunchReports failed because Sso:Reports:BaseUrl is not a valid absolute HTTP or HTTPS URL.");
             return StatusCode(StatusCodes.Status503ServiceUnavailable,
                 "سامانه گزارشات هنوز در تنظیمات درگاه مادر تعریف نشده است.");
         }
-        Console.WriteLine("---------", reportsBaseUrl);
-        Console.WriteLine("---------", userId,userCode,userName);
 
-        var ticket = await _reportsSso.IssueAsync(
-            new ReportsSsoIdentity(userId, userCode, userName), cancellationToken);
+        var consumeUrl = new Uri(baseUri.AbsoluteUri.TrimEnd('/') + "/sso/consume").ToString();
+        _logger.LogInformation("LaunchReports validated configuration. Reports consume host: {ReportsHost}", baseUri.Host);
 
-        ssoModel.ReportsConsumeUrl = new Uri(baseUri.AbsoluteUri.TrimEnd('/') + "/sso/consume").ToString();
-        ssoModel.SsoTicket = ticket;
+        string ticket;
+        try
+        {
+            ticket = await _reportsSso.IssueAsync(
+                new ReportsSsoIdentity(userId, userCode, userName),
+                cancellationToken);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            _logger.LogInformation("LaunchReports was canceled while issuing the SSO ticket.");
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "LaunchReports failed while issuing the SSO ticket.");
+            return StatusCode(StatusCodes.Status503ServiceUnavailable,
+                "در حال حاضر امکان اتصال به سامانه گزارشات وجود ندارد.");
+        }
+
+        var ssoModel = new SsoModelDto
+        {
+            ReportsConsumeUrl = consumeUrl,
+            SsoTicket = ticket
+        };
+
         Response.Headers["Cache-Control"] = "no-store, no-cache";
         Response.Headers["Referrer-Policy"] = "no-referrer";
         Response.Headers["X-Robots-Tag"] = "noindex, nofollow";
-        Console.WriteLine("---------",ssoModel.ReportsConsumeUrl);
-        Console.WriteLine("---------", ssoModel.SsoTicket);
 
+        _logger.LogInformation("LaunchReports completed successfully. SSO ticket was issued.");
         return View(ssoModel);
     }
 
