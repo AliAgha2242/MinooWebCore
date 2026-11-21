@@ -23,7 +23,7 @@ Open the HTTPS/HTTP URL printed in the console.
 
 ## Authentication
 
-The login form validates the supplied username against `Users.UserCode` without numeric conversion, preserving leading zeroes. Password validation continues through the existing password decryption service. Keep database credentials and encryption configuration in a secret store or environment variables.
+The login form validates the supplied username against `Users.UserCode` without numeric conversion, preserving leading zeroes. Password validation continues through the existing password decryption service. Database credentials and encryption configuration are read from `src/MinooWebCore/appsettings.json` in this deployment.
 
 ## MinooWebReports single sign-on
 
