@@ -145,7 +145,7 @@ namespace MinooWebCore.Persistence.StaticConfiguration
                     bool match = false;
 
                     if ((!string.IsNullOrEmpty(serverName) && vahedeTejariSN != null)
-                        && (string.Equals(item.Value<string>("ServerName"), serverName, StringComparison.OrdinalIgnoreCase) && string.Equals(item.Value<double?>("VahedeTejariSN"), vahedeTejariSN.Value)))
+                        && ((string.Equals(item.Value<string>("ServerName"), serverName, StringComparison.OrdinalIgnoreCase) || string.Equals(item.Value<string>("Ip") ?? item.Value<string>("ServerIp"), serverName, StringComparison.OrdinalIgnoreCase)) && string.Equals(item.Value<double?>("VahedeTejariSN"), vahedeTejariSN.Value)))
                     {
                         result.Clear();
                         result.Add(
@@ -160,7 +160,8 @@ namespace MinooWebCore.Persistence.StaticConfiguration
                     }
 
                     if (!string.IsNullOrEmpty(serverName) &&
-                        string.Equals(item.Value<string>("ServerName"), serverName, StringComparison.OrdinalIgnoreCase))
+                        (string.Equals(item.Value<string>("ServerName"), serverName, StringComparison.OrdinalIgnoreCase) ||
+                         string.Equals(item.Value<string>("Ip") ?? item.Value<string>("ServerIp"), serverName, StringComparison.OrdinalIgnoreCase)))
                         match = true;
 
                     if (!string.IsNullOrEmpty(databaseName) &&
