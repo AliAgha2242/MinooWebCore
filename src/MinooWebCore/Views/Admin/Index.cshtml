@@ -135,10 +135,14 @@
                         </div>
                         <div class="report-field report-server-select" id="multiServerField" hidden>
                             <strong>سرورهای موردنظر را انتخاب کنید</strong>
+                            <input type="search" id="reportServerSearch" class="report-server-search"
+                                   placeholder="جست‌وجوی نام سرور، دیتابیس یا شماره واحد..." aria-label="جست‌وجوی سرورها"
+                                   autocomplete="off" />
                             <div class="report-server-list">
                                 @foreach (var server in availableServers)
                                 {
-                                    <label class="report-server-choice">
+                                    <label class="report-server-choice"
+                                           data-search-text="@($"{server.ServerName} {server.DatabaseName} {server.VahedeTejariSN}")">
                                         <input type="checkbox" name="SelectedServerVahedeTejariSNs"
                                                value="@server.VahedeTejariSN.ToString(System.Globalization.CultureInfo.InvariantCulture)"
                                                checked="@selectedServerIds.Contains(server.VahedeTejariSN)" />
@@ -146,6 +150,7 @@
                                     </label>
                                 }
                             </div>
+                            <p id="reportServerNoResults" class="report-server-no-results" hidden>سروری با این عبارت پیدا نشد.</p>
                             <span asp-validation-for="SelectedServerVahedeTejariSNs" class="report-field-error"></span>
                         </div>
                         <p class="report-server-hint"><span>ⓘ</span> در حالت چندسروره، نتیجه Query از تمام سرورهای انتخاب‌شده دریافت و یکپارچه می‌شود.</p>
@@ -254,6 +259,22 @@
                 updateServerSelection();
             }
 
+            const serverSearch = document.getElementById('reportServerSearch');
+            const serverChoices = Array.from(multiServerField.querySelectorAll('.report-server-choice'));
+            const serverNoResults = document.getElementById('reportServerNoResults');
+
+            function filterServers() {
+                const query = (serverSearch?.value || '').trim().toLocaleLowerCase();
+                let visibleCount = 0;
+                serverChoices.forEach(choice => {
+                    const text = (choice.dataset.searchText || choice.textContent || '').toLocaleLowerCase();
+                    const matches = !query || text.includes(query);
+                    choice.hidden = !matches;
+                    if (matches) visibleCount++;
+                });
+                if (serverNoResults) serverNoResults.hidden = !query || visibleCount > 0;
+            }
+
             function updateServerSelection() {
                 const useDefault = document.querySelector('input[name="UseDefaultServer"]:checked')?.value !== 'false';
                 const disabled = useDefault || source.value === 'Excel';
@@ -262,6 +283,9 @@
                     input.disabled = disabled;
                 });
             }
+
+            serverSearch?.addEventListener('input', filterServers);
+            filterServers();
 
             function updatePagination() {
                 pageSizeField.hidden = !pagination.checked;
