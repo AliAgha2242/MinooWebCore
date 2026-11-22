@@ -329,7 +329,7 @@ namespace MinooWebCore.Persistence.StaticConfiguration
                 result.Add(
                     new ServerInfo()
                     {
-                        ServerName = item.Value<string>("Ip") ?? item.Value<string>("ServerIp") ?? item.Value<string>("ServerName"),
+                        ServerName = item.Value<string>("ServerName"),
                         DatabaseName = item.Value<string>("databaseName"),
                         VahedeTejariSN = item.Value<decimal>("VahedeTejariSN"),
                         ServerIp = item.Value<string>("Ip") ?? item.Value<string>("ServerIp")
