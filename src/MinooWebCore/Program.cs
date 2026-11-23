@@ -20,6 +20,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.infrasreg(builder.Configuration);
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<IUsersService, UsersService>();
+builder.Services.AddScoped<IMenuAccessService, MenuAccessService>();
 builder.Services.AddScoped<IAuthenticateService, AuthenticateService>();
 builder.Services.AddScoped<IReportsSsoTicketService, ReportsSsoTicketService>();
 builder.Services.AddWcfClient();

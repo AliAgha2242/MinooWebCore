@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MinooWebCore.Infrastructure.Services.Contract;
 using MinooWebCore.Models;
 using MinooWebCore.Services.Redis;
 
@@ -16,15 +17,41 @@ public sealed class HomeController : Controller
     };
 
     private readonly IRedisService _redis;
+    private readonly IMenuAccessService _menuAccessService;
 
-    public HomeController(IRedisService redis) => _redis = redis;
+    public HomeController(IRedisService redis, IMenuAccessService menuAccessService)
+    {
+        _redis = redis;
+        _menuAccessService = menuAccessService;
+    }
 
     public async Task<IActionResult> Index()
     {
-        ViewBag.SoftwareGroups = SoftwareGroups;
         if (!TryGetUserId(out var userId))
             return Forbid();
 
+        var softwareGroups = SoftwareGroups.ToDictionary(
+            group => group.Key,
+            group => group.Value,
+            StringComparer.Ordinal);
+
+        var canRunMapping = await _menuAccessService.HasAccessAsync(
+            userId,
+            "RunNegasht",
+            HttpContext.RequestAborted);
+
+        if (!canRunMapping)
+        {
+            const string financeGroup = "گروه نرم افزاری مالی";
+            if (softwareGroups.TryGetValue(financeGroup, out var applications))
+            {
+                softwareGroups[financeGroup] = applications
+                    .Where(application => !string.Equals(application, "اجرا نگاشت", StringComparison.Ordinal))
+                    .ToArray();
+            }
+        }
+
+        ViewBag.SoftwareGroups = softwareGroups;
         ViewBag.FavoriteApplications =
             await _redis.GetAsync<List<FavoriteApplication>>(GetFavoriteApplicationsKey(userId))
             ?? [];

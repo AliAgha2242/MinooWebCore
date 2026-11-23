@@ -2,6 +2,7 @@ using System.Globalization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
+using MinooWebCore.Authorization;
 using MinooWebCore.Data.Models;
 using MinooWebCore.Persistence.StaticConfiguration;
 using MinooWebCore.Services.Wcf;
@@ -13,6 +14,7 @@ namespace MinooWebCore.Controllers;
 [ApiController]
 [Authorize]
 [Route("api/mapping")]
+[MenuAccess("RunNegasht")]
 public sealed class MappingController : ControllerBase
 {
     private static readonly TimeSpan MappingInterval = TimeSpan.FromHours(1);
