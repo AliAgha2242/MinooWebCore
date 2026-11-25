@@ -27,7 +27,7 @@ public sealed class HomeController : Controller
 
     public async Task<IActionResult> Index()
     {
-        if (!TryGetUserId(out var userId))
+        if (!TryGetUserId(out var userId, out var userCode))
             return Forbid();
 
         var softwareGroups = SoftwareGroups.ToDictionary(
@@ -36,7 +36,7 @@ public sealed class HomeController : Controller
             StringComparer.Ordinal);
 
         var canRunMapping = await _menuAccessService.HasAccessAsync(
-            userId,
+            userCode,
             "RunNegasht",
             HttpContext.RequestAborted);
 
@@ -77,8 +77,11 @@ public sealed class HomeController : Controller
     [AllowAnonymous]
     public IActionResult Error() => View();
 
-    private bool TryGetUserId(out int userId) =>
-        int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out userId);
+    private bool TryGetUserId(out int userId, out string userCode)
+    {
+        userCode = User.FindFirstValue("UserCode") ?? string.Empty;
+        return int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out userId) && userId > 0 && !string.IsNullOrWhiteSpace(userCode);
+    }
 
     private static string GetFavoriteApplicationsKey(int userId) =>
         $"minoo:user:{userId}:favorite-applications";
