@@ -41,11 +41,11 @@ public sealed class MenuAccessFilter : IAsyncAuthorizationFilter
             return;
         }
 
-        var userIdValue = principal.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!int.TryParse(userIdValue, out var userId) || userId <= 0)
+        var userCode = principal.FindFirstValue("UserCode");
+        if (string.IsNullOrWhiteSpace(userCode))
         {
             _logger.LogWarning(
-                "Menu access denied because the authenticated principal has no valid user identifier. Menu: {ObjectName}.",
+                "Menu access denied because the authenticated principal has no valid UserCode. Menu: {ObjectName}.",
                 _objectName);
 
             context.Result = new ForbidResult();
@@ -53,7 +53,7 @@ public sealed class MenuAccessFilter : IAsyncAuthorizationFilter
         }
 
         var hasAccess = await _menuAccess.HasAccessAsync(
-            userId,
+            userCode,
             _objectName,
             context.HttpContext.RequestAborted);
 
