@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
@@ -21,6 +22,7 @@ public sealed class MappingController : ControllerBase
     private const string EndpointPath = "/Minoo.Services.SanadMali/SanadMaliWebService.svc";
 
     private readonly IMinooConfiguration _minooConfiguration;
+    private readonly IMenuAccessService _menuAccessService;
     private readonly IWcfClient _wcfClient;
     private readonly IRedisService _redis;
     private readonly IConfiguration _configuration;
@@ -28,12 +30,14 @@ public sealed class MappingController : ControllerBase
 
     public MappingController(
         IMinooConfiguration minooConfiguration,
+        IMenuAccessService menuAccessService,
         IWcfClient wcfClient,
         IRedisService redis,
         IConfiguration configuration,
         ILogger<MappingController> logger)
     {
         _minooConfiguration = minooConfiguration;
+        _menuAccessService = menuAccessService;
         _wcfClient = wcfClient;
         _redis = redis;
         _configuration = configuration;
@@ -43,7 +47,15 @@ public sealed class MappingController : ControllerBase
     [HttpGet("servers")]
     public async Task<ActionResult<IReadOnlyList<MappingServerStatus>>> GetServers()
     {
+        var userCode = User.FindFirstValue("UserCode");
+        if (string.IsNullOrWhiteSpace(userCode))
+            return Forbid();
+
         var servers = _minooConfiguration.GetAllSerevr();
+        var authorizedNames = await _menuAccessService.GetAuthorizedServerNamesAsync(
+            userCode, "RunNegasht", HttpContext.RequestAborted);
+        var authorizedNameSet = authorizedNames.ToHashSet(StringComparer.OrdinalIgnoreCase);
+        servers = servers.Where(server => authorizedNameSet.Contains(server.ServerName)).ToList();
 
         var statuses = await Task.WhenAll(servers.Select(async server =>
         {
@@ -77,14 +89,22 @@ public sealed class MappingController : ControllerBase
                 new { message = "نام کاربری و رمز سرویس WCF در تنظیمات Mapping وارد نشده است." });
         }
 
+        var userCode = User.FindFirstValue("UserCode");
+        if (string.IsNullOrWhiteSpace(userCode))
+            return Forbid();
+
         var configuredServers = _minooConfiguration.GetAllSerevr();
         var requestedIds = request.ServerIds.Distinct().ToHashSet();
+        var authorizedNames = await _menuAccessService.GetAuthorizedServerNamesAsync(
+            userCode, "RunNegasht", HttpContext.RequestAborted);
+        var authorizedNameSet = authorizedNames.ToHashSet(StringComparer.OrdinalIgnoreCase);
         var selectedServers = configuredServers
-            .Where(server => requestedIds.Contains(server.VahedeTejariSN))
+            .Where(server => requestedIds.Contains(server.VahedeTejariSN) &&
+                             authorizedNameSet.Contains(server.ServerName))
             .ToList();
 
         if (selectedServers.Count != requestedIds.Count)
-            return BadRequest(new { message = "یک یا چند سرور انتخاب‌شده در تنظیمات معتبر نیست." });
+            return BadRequest(new { message = "یک یا چند سرور انتخاب‌شده در تنظیمات یا دسترسی کاربر معتبر نیست." });
 
         var callSynchronous = _configuration.GetValue("Mapping:CallSynchronous", false);
 
