@@ -13,7 +13,7 @@ public sealed class HomeController : Controller
     private static readonly Dictionary<string, string[]> SoftwareGroups = new()
     {
         ["گروه نرم افزاری گزارشات مبتنی بر وب"] = ["گزارشات"],
-        ["گروه نرم افزاری مالی"] = ["اجرا نگاشت", "برنامه دو", "برنامه سه"]
+        ["گروه نرم افزاری مالی"] = ["اجرا نگاشت"]
     };
 
     private readonly IRedisService _redis;
