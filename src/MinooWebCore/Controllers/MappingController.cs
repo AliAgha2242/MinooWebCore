@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Components.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using MinooWebCore.Authorization;
 using MinooWebCore.Data.Models;
+using MinooWebCore.Infrastructure.Services.Contract;
 using MinooWebCore.Persistence.StaticConfiguration;
 using MinooWebCore.Services.Wcf;
 using MinooWebCore.Services.Wcf.Contracts;
