@@ -10,7 +10,7 @@ namespace MinooWebCore.Controllers;
 [Authorize]
 public sealed class HomeController : Controller
 {
-    private const string ReportsAccessName = "A";
+    private const string ReportsAccessName = "ReportMenu";
     private const string ReportsGroupName = "گروه نرم افزاری گزارشات مبتنی بر وب";
     private const string ReportsMenuName = "گزارشات";
 
