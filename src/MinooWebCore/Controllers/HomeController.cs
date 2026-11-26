@@ -10,6 +10,10 @@ namespace MinooWebCore.Controllers;
 [Authorize]
 public sealed class HomeController : Controller
 {
+    private const string ReportsAccessName = "A";
+    private const string ReportsGroupName = "گروه نرم افزاری گزارشات مبتنی بر وب";
+    private const string ReportsMenuName = "گزارشات";
+
     private static readonly Dictionary<string, string[]> SoftwareGroups = new()
     {
         ["گروه نرم افزاری گزارشات مبتنی بر وب"] = ["گزارشات"],
@@ -34,6 +38,14 @@ public sealed class HomeController : Controller
             group => group.Key,
             group => group.Value,
             StringComparer.Ordinal);
+
+        var canViewReports = await _menuAccessService.HasAccessAsync(
+            userCode,
+            ReportsAccessName,
+            HttpContext.RequestAborted);
+
+        if (!canViewReports)
+            softwareGroups.Remove(ReportsGroupName);
 
         var canRunMapping = await _menuAccessService.HasAccessAsync(
             userCode,
@@ -61,13 +73,26 @@ public sealed class HomeController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult SelectSoftware(string groupName, string softwareName)
+    public async Task<IActionResult> SelectSoftware(string groupName, string softwareName)
     {
         if (string.IsNullOrWhiteSpace(groupName) ||
             !SoftwareGroups.TryGetValue(groupName, out var softwareList) ||
             string.IsNullOrWhiteSpace(softwareName) ||
             !softwareList.Contains(softwareName, StringComparer.Ordinal))
             return BadRequest();
+
+        if (string.Equals(groupName, ReportsGroupName, StringComparison.Ordinal) &&
+            string.Equals(softwareName, ReportsMenuName, StringComparison.Ordinal))
+        {
+            var userCode = User.FindFirstValue("UserCode");
+            var canViewReports = await _menuAccessService.HasAccessAsync(
+                userCode ?? string.Empty,
+                ReportsAccessName,
+                HttpContext.RequestAborted);
+
+            if (!canViewReports)
+                return Forbid();
+        }
 
         TempData["SelectedGroup"] = groupName;
         TempData["SelectedSoftware"] = softwareName;
