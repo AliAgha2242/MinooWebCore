@@ -347,15 +347,15 @@
                             <textarea name="Parameters[${index}].Options" maxlength="5000" rows="3" placeholder="هر گزینه در یک خط"></textarea>
                         </div>
                         <div class="report-field parameter-extra parameter-list-source" data-for-type="ListBox ComboBox">
-                            <label>Query منبع گزینه‌های لیست‌باکس</label>
+                            <label>Query منبع گزینه‌ها</label>
                             <textarea name="Parameters[${index}].DataSource" maxlength="10000" rows="4" dir="ltr" spellcheck="false" placeholder="SELECT Id, Title FROM ..."></textarea>
                         </div>
-                        <div class="report-field parameter-extra" data-for-type="ListBox">
-                            <label>نام ستون نمایشی (DisplayName)</label>
+                        <div class="report-field parameter-extra" data-for-type="ListBox ComboBox">
+                            <label>نام ستون نمایشی (DisplayMember)</label>
                             <input name="Parameters[${index}].DisplayNameField" type="text" maxlength="128" dir="ltr" placeholder="Title" />
                         </div>
-                        <div class="report-field parameter-extra" data-for-type="ListBox">
-                            <label>نام ستون مقدار (ValueName)</label>
+                        <div class="report-field parameter-extra" data-for-type="ListBox ComboBox">
+                            <label>نام ستون مقدار (ValueMember)</label>
                             <input name="Parameters[${index}].ValueField" type="text" maxlength="128" dir="ltr" placeholder="Id" />
                         </div>
                     </div>`;
