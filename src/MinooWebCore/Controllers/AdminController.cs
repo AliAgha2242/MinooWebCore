@@ -465,7 +465,7 @@ public sealed class AdminController : Controller
             if (parameter.Type is "ListBox" or "ComboBox")
             {
                 if (string.IsNullOrWhiteSpace(parameter.DataSource) || parameter.DataSource.Length > 10000)
-                    ModelState.AddModelError($"{prefix}.DataSource", "Query منبع لیست‌باکس الزامی است و حداکثر ۱۰٬۰۰۰ کاراکتر می‌تواند باشد.");
+                    ModelState.AddModelError($"{prefix}.DataSource", "Query منبع گزینه‌ها برای لیست‌باکس و کمبوباکس الزامی است و حداکثر ۱۰٬۰۰۰ کاراکتر می‌تواند باشد.");
                 if (!IsValidFieldIdentifier(parameter.DisplayNameField))
                     ModelState.AddModelError($"{prefix}.DisplayNameField", "نام ستون نمایشی معتبر نیست.");
                 if (!IsValidFieldIdentifier(parameter.ValueField))
